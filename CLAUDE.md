@@ -263,8 +263,23 @@ Iteration 3.1 (final polish)
   failed. Refund screens now offer only the decisions `availableRefundDecisions` allows (Approve,
   Request documents while verifying); Reject remains possible where the model allows it (On hold,
   Appealed). Changing this needs an explicit change to the status model.
-- End-to-end run of the README demo script at 1440px (25 Nov 2026): see the issues list in the
-  final iteration 3.1 notes below.
+- **End-to-end run of the README demo script at 1440px** (main script steps 1–12 and the AI
+  analysis segment, with in-app navigation only):
+  - Blocker found and fixed: Reject in the refund queue always failed (see above).
+  - Fixed in the README: step 5 said ~3 s (the intake takes ~4 s); step 6 mentioned the camera
+    status, which the compact `/demo` staff pane does not show.
+  - Everything else worked as scripted: sign-in, dashboard and assistant answers, F-2041 detail,
+    challenge wizard with sample documents, tracker Received → Validating, `/demo` decision
+    updating the phone, audit entries, inbox banner (7 clear · 5 with flags), group view (5
+    cases, C-1046 "New evidence", no approve-all), cameras, bulk revocation (8 fines, COP
+    1,300,000 refunds), refund queue sections, audit filters, citizen F-2042/F-2044 Revoked,
+    refund Verifying → Approved; AI segment replay, report, Documents tab, flag dismissal and
+    confirmation, decision and AI oversight (dismissal listed, rate 33%).
+  - Not a bug, worth knowing when recording: run the main script first, then the AI segment.
+    "Replay Marta's submission" removes C-1042's earlier decision and its audit entries (demo
+    only), so after the replay C-1042 is undecided again and F-2041 is no longer revoked until
+    the segment's own decision.
+- Feature freeze: `main` at tag `v1.3-demo` is the version for recording.
 
 Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
 
