@@ -43,11 +43,11 @@ describe("summariseIntake", () => {
     ],
   });
 
-  it("counts analysed, grouped, flagged and ready filings, skipping running intakes", () => {
+  it("splits analysed filings into clear and with flags, skipping running intakes", () => {
     const rows = buildChallengeRows(ctx);
     const summary = summariseIntake(rows, { "C-c": 2 });
     expect(summary.analysed).toBe(2);
+    expect(summary.clear + summary.flagged).toBe(summary.analysed);
     expect(summary.grouped).toBe(1);
-    expect(summary.flagged + summary.ready).toBe(2);
   });
 });

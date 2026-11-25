@@ -18,6 +18,7 @@ import {
   EXPIRED_CALIBRATION,
   HERO_EVIDENCE,
   LEGAL_RAPIDO_TEMPLATE,
+  driverEvidence,
   powerOfAttorney,
 } from "./mockEvidence";
 
@@ -27,7 +28,7 @@ import {
 export const DEMO_TODAY = "2026-11-25";
 
 /** Version of this seed. Saved demos from another version are discarded on load. */
-export const DEMO_DATA_VERSION = 7;
+export const DEMO_DATA_VERSION = 8;
 
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
@@ -214,6 +215,12 @@ export const fines: Fine[] = [
     owner: ["Héctor Fabián Suárez", "19.443.870", "GHV417"],
     cameraId: "CAM-BOY80",
     dates: ["2026-11-10", "2026-11-11"],
+  }),
+  fine({
+    id: "F-3112",
+    owner: ["Lucía Prieto Gómez", "52.640.118", "KLM208"],
+    cameraId: "CAM-CAR63",
+    dates: ["2026-11-13", "2026-11-17"],
   }),
   fine({
     id: "F-3111",
@@ -454,15 +461,32 @@ export const challenges: ChallengeCase[] = [
     fineId: "F-3110",
     reason: "I wasn't driving",
     submittedOn: "2026-11-19",
-    facts: ["My son was driving the car that day. He has a valid licence."],
-    evidence: [{ name: "id-copy.pdf", kind: "ID copy" }],
+    facts: [
+      "My son Daniel was driving the car that day. He has a valid licence and signed a statement.",
+    ],
+    evidence: driverEvidence(
+      "Héctor Fabián Suárez",
+      "19.443.870",
+      "Daniel Suárez Mejía",
+      "2026-11-17",
+      "LIC-10334871",
+    ),
   }),
   challenge({
     id: "C-1052",
-    fineId: "F-3110",
+    fineId: "F-3112",
     reason: "I wasn't driving",
     submittedOn: "2026-11-24",
-    facts: ["I already sent this. My son was driving, not me."],
+    facts: [
+      "My husband Carlos was driving my car that morning. His signed statement and licence are attached.",
+    ],
+    evidence: driverEvidence(
+      "Lucía Prieto Gómez",
+      "52.640.118",
+      "Carlos Ramírez Ortiz",
+      "2026-11-21",
+      "LIC-79552019",
+    ),
   }),
   challenge({
     id: "C-1053",

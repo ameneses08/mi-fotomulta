@@ -13,6 +13,15 @@ const finding = (caseId: string, key: string) =>
 const refundFinding = (refundId: string, key: string) =>
   analyseRefund(refundId, ctx)?.findings.find((f) => f.id === `${refundId}:${key}`);
 
+describe("flags are a minority in the seeded filings", () => {
+  it("flags only the deliberate demo cases", () => {
+    const flagged = ctx.challenges
+      .filter((c) => analyseCase(c.id, ctx)?.findings.some((f) => f.result === "Flag"))
+      .map((c) => c.id);
+    expect(flagged).toEqual(["C-1044", "C-1048", "C-1049", "C-1050", "C-1053"]);
+  });
+});
+
 describe("seeded evidence produces the scripted findings", () => {
   it("C-1042: on time, statement signed, names consistent, licence valid, driver identified (H)", () => {
     expect(

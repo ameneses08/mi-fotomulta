@@ -233,7 +233,15 @@ Iteration 3 (mock AI analyses for the administration)
   after a reload; the last step completes the automatic checks (Received → Validating). Because
   4 s is too short to switch screens by hand, Demo controls has **Replay Marta's submission**
   (demo only): it removes C-1042 and re-submits it with the sample documents.
-- "AI intake today" counts open filings whose intake finished; "ready" = analysed minus flagged.
+- "AI intake today" counts open filings whose intake finished, split into non-overlapping
+  "clear" and "with flags to review" (every analysed filing is ready for an inspector);
+  "in groups" is a separate overview count.
+- Iteration 3.1 recalibration: flags are a minority. A non-compliant camera (R4), no act in
+  force yet (R10) and a templated filing (R9) are **Info**, not Flags, because they support the
+  claim or only describe grouping. C-1051 and C-1052 now carry complete driver documents, and
+  C-1052 moved to its own fine F-3112 (no longer a duplicate of C-1051). Flagged seed filings:
+  C-1044 (expired power of attorney), C-1048 (late notice), C-1049 (edited photo), C-1050
+  (plate mismatch), C-1053 (sold, not transferred).
 - AI oversight assumption: **4 minutes of reading saved per summarised filing**
   (`OVERSIGHT_CONFIG.minutesPerSummary`). A few earlier decisions this month (C-1031–C-1039,
   cases no longer in the queue) are seeded in the audit log so the panel has history.

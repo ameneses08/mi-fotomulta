@@ -66,7 +66,8 @@ export function similarityFindings(
         caseId: challenge.id,
         category: "Similarity",
         check: T.checks.similarity,
-        result: added ? "Pass" : "Flag",
+        // Similarity alone is an overview fact, not a problem: each case is still read in full.
+        result: added ? "Pass" : "Info",
         evidence: added ? `From: ${added.kind}` : "From: filing text compared with the group",
         confidence: "High",
         level: "S",

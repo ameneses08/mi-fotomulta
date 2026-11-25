@@ -36,6 +36,46 @@ export const HERO_EVIDENCE: EvidenceItem[] = [
   },
 ];
 
+/** A complete "I wasn't driving" filing: owner's ID, a signed driver statement and the licence. */
+export function driverEvidence(
+  owner: string,
+  ownerDocument: string,
+  driver: string,
+  signedOn: string,
+  licence: string,
+): EvidenceItem[] {
+  const slug = driver.toLowerCase().split(" ")[0];
+  return [
+    {
+      name: "id-copy.pdf",
+      kind: "ID copy",
+      extracted: [
+        { name: "Full name", value: owner, page: 1 },
+        { name: "Document number", value: ownerDocument, page: 1 },
+      ],
+    },
+    {
+      name: `signed-statement-${slug}.pdf`,
+      kind: "Driver statement",
+      extracted: [
+        { name: "Declarant", value: driver, page: 1 },
+        { name: "Driver", value: driver, page: 1 },
+        { name: "Signature", value: "Present", page: 1 },
+        { name: "Date signed", value: signedOn, page: 1 },
+      ],
+    },
+    {
+      name: `licence-${slug}.pdf`,
+      kind: "Driving licence",
+      extracted: [
+        { name: "Full name", value: driver, page: 1 },
+        { name: "Licence number", value: licence, page: 1 },
+        { name: "Valid until", value: "2028-09-30", page: 1 },
+      ],
+    },
+  ];
+}
+
 /** LegalRápido S.A.S. power of attorney for one represented citizen. */
 export function powerOfAttorney(person: string, expires: string): EvidenceItem {
   return {

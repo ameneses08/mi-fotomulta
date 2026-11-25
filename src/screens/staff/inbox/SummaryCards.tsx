@@ -5,7 +5,7 @@ const CARDS: { key: keyof QueueSummary; label: string; icon: LucideIcon }[] = [
   { key: "openCases", label: "Open cases", icon: FolderOpen },
   { key: "atRisk", label: "At risk of missing deadline", icon: AlertTriangle },
   { key: "refundsToApprove", label: "Refunds to approve", icon: Wallet },
-  { key: "flagged", label: "Flags", icon: Flag },
+  { key: "flagged", label: "Flags to review (cases and refunds)", icon: Flag },
 ];
 
 export function SummaryCards({ summary }: { summary: QueueSummary }) {

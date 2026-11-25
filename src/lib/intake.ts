@@ -20,14 +20,15 @@ export function intakeSteps(completed: number): { label: string; state: StageSta
   }));
 }
 
+/** Non-overlapping counts: clear + flagged = analysed. Grouped is a separate overview count. */
 export interface IntakeSummary {
   analysed: number;
-  grouped: number;
+  clear: number;
   flagged: number;
-  ready: number;
+  grouped: number;
 }
 
-/** "AI intake today": open filings analysed, grouped, flagged, and ready for an inspector. */
+/** "AI intake today": every analysed filing is ready for an inspector; some carry flags. */
 export function summariseIntake(
   rows: readonly ChallengeRow[],
   progress: IntakeProgress,
@@ -36,8 +37,8 @@ export function summariseIntake(
   const flagged = analysed.filter((row) => row.flags.length > 0);
   return {
     analysed: analysed.length,
-    grouped: analysed.filter((row) => row.groupId).length,
+    clear: analysed.length - flagged.length,
     flagged: flagged.length,
-    ready: analysed.length - flagged.length,
+    grouped: analysed.filter((row) => row.groupId).length,
   };
 }

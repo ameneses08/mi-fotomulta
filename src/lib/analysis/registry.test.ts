@@ -23,13 +23,14 @@ describe("registryFindings", () => {
       makeFine({ cameraId: unauthorisedCamera.id, imagePlate: "AAA117" }),
       ctx,
     );
-    expect(result(bad, "R4")).toBe("Flag");
+    // An unauthorised camera supports the challenge: information, not a flag.
+    expect(result(bad, "R4")).toBe("Info");
     expect(result(bad, "R6")).toBe("Flag");
   });
 
   it("applies the bulk act only while it is in force (R10)", () => {
     const fine = makeFine({ cameraId: unauthorisedCamera.id });
-    expect(result(registryFindings(makeChallenge(), fine, ctx), "R10")).toBe("Flag");
+    expect(result(registryFindings(makeChallenge(), fine, ctx), "R10")).toBe("Info");
     const inForce = { ...ctx, legalActs: [makeAct({ status: "In force" })] };
     expect(result(registryFindings(makeChallenge(), fine, inForce), "R10")).toBe("Pass");
   });

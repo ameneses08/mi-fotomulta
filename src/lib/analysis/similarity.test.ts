@@ -48,9 +48,9 @@ describe("textSimilarity", () => {
 describe("similarityFindings (R9)", () => {
   const ctx = makeAnalysisContext({ challenges: [a, b, c] });
 
-  it("flags a templated filing with no new evidence", () => {
+  it("notes a templated filing with no new evidence as information, not a flag", () => {
     const [finding] = similarityFindings(a, ctx);
-    expect(finding).toMatchObject({ result: "Flag", category: "Similarity", level: "S" });
+    expect(finding).toMatchObject({ result: "Info", category: "Similarity", level: "S" });
     expect(finding?.why).toMatch(/identical to 2 other Firm filings/);
   });
 

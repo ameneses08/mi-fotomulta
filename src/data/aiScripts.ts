@@ -259,14 +259,16 @@ export const analysisScripts = {
     driverFlag:
       "The owner cannot be presumed to be the driver, and the filing does not yet identify who was driving (R7, C-038/2020).",
     cameraPass: "ANSV lists camera {camera} as authorised on {date}.",
-    cameraFlag: "ANSV does not list camera {camera} as authorised on {date}.",
+    cameraFlag:
+      "ANSV does not list camera {camera} as authorised on {date}. This supports the challenge; an inspector decides.",
     platePass: "The plate read from the image ({image}) matches RUNT ({plate}).",
     plateFlag: "The image reads {image} but RUNT has {plate}. Confirm the image before deciding.",
     saleFlag:
       "Bill of sale dated {sale}, before the infraction on {infraction}, but RUNT still lists {owner} as owner. Sold but not transferred – inspector decides.",
     saleInfo: "A sale is claimed but the documents do not show a sale before the infraction.",
     bulkPass: "Covered by {act}, which is in force. The fine is revoked.",
-    bulkFlag: "The camera was non-compliant, but no legal act is in force yet.",
+    bulkFlag:
+      "The camera was non-compliant, but no legal act is in force yet: this case is decided individually.",
     similarityFlag:
       "{percent}% identical to {count} other {representative} filings, with no new evidence. Grouping saves reading time; review this case individually.",
     similarityPass:

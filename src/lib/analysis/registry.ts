@@ -64,7 +64,8 @@ export function registryFindings(
         caseId: challenge.id,
         category: "Registry",
         check: T.checks.camera,
-        result: nonCompliant ? "Flag" : "Pass",
+        // A non-compliant camera supports the challenge; it is information, not a problem to review.
+        result: nonCompliant ? "Info" : "Pass",
         evidence: "From: ANSV camera registry",
         confidence: "High",
         level: "A",
@@ -102,7 +103,7 @@ export function registryFindings(
           caseId: challenge.id,
           category: "Registry",
           check: T.checks.bulk,
-          result: act ? "Pass" : "Flag",
+          result: act ? "Pass" : "Info",
           evidence: "From: legal acts register",
           confidence: "High",
           level: "S",
