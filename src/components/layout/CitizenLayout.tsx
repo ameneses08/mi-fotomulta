@@ -44,7 +44,7 @@ export function CitizenLayout({ children, back, embedded = false }: CitizenLayou
           <AssistantPanel />
         </aside>
       </div>
-      <div className="@4xl:hidden">
+      <div className="assistant-launcher @4xl:hidden">
         <AssistantLauncher />
       </div>
     </div>

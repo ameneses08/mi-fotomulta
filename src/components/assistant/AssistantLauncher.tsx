@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { AssistantPanel } from "./AssistantPanel";
 
 /**
- * Narrow containers: a floating "Ask the assistant" button that opens a bottom sheet. Both are
- * sticky inside the scrolling container, so they also stay inside the /demo phone frame.
+ * Narrow containers: a floating "Ask the assistant" button that opens a bottom sheet. The parent
+ * wrapper is sticky inside the scrolling container, so it also stays inside the /demo phone frame.
  */
 export function AssistantLauncher() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="assistant-launcher">
+    <>
       {open ? (
         <div className="assistant-sheet" role="dialog" aria-label="AI assistant">
           <div className="flex justify-end">
@@ -27,6 +27,6 @@ export function AssistantLauncher() {
           Ask the assistant
         </Button>
       )}
-    </div>
+    </>
   );
 }

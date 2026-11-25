@@ -18,7 +18,7 @@ export function CaseDetailScreen({ id }: { id: string }) {
     <StaffLayout active="inbox">
       <Link to="/staff" className="back-link">
         <ArrowLeft size={16} aria-hidden="true" />
-        Back to queue
+        Back to inbox
       </Link>
       {challenge && (
         <>

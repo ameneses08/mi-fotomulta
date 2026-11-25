@@ -65,7 +65,7 @@ export function FineDetailScreen({ id }: { id: string }) {
           </Notice>
           <CameraPlaceholder cameraId={fine.cameraId} />
         </div>
-        <div className="min-w-0">
+        <div className="order-first min-w-0 @3xl:order-none">
           <section className="panel" aria-labelledby="fine-status">
             <h2 id="fine-status" className="sr-only">
               Status and next step

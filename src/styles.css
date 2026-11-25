@@ -1337,3 +1337,31 @@
 .citizen-app.embedded {
   padding: 0;
 }
+
+@media (max-width: 540px) {
+  .site-header {
+    height: auto;
+    min-height: 64px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .brand-caption,
+  .prototype-label {
+    display: none;
+  }
+  .brand-symbol {
+    width: 32px;
+  }
+  .movilidad-tag {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 540px) {
+  .staff-sidebar nav {
+    overflow-x: auto;
+  }
+  .staff-nav {
+    white-space: nowrap;
+  }
+}
