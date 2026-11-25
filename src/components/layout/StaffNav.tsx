@@ -1,13 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { Cctv, Inbox, Landmark, ScrollText, Wallet, type LucideIcon } from "lucide-react";
+import { Cctv, Eye, Inbox, Landmark, ScrollText, Wallet, type LucideIcon } from "lucide-react";
 
-export type StaffSection = "inbox" | "refunds" | "cameras" | "bulk" | "audit";
+export type StaffSection = "inbox" | "refunds" | "cameras" | "bulk" | "audit" | "oversight";
 
 interface NavItem {
   section: StaffSection;
   label: string;
   icon: LucideIcon;
-  to: "/staff" | "/staff/refunds" | "/staff/cameras" | "/staff/bulk-revocation" | "/staff/audit";
+  to:
+    | "/staff"
+    | "/staff/refunds"
+    | "/staff/cameras"
+    | "/staff/bulk-revocation"
+    | "/staff/audit"
+    | "/staff/ai-oversight";
 }
 
 const NAV: NavItem[] = [
@@ -16,6 +22,7 @@ const NAV: NavItem[] = [
   { section: "cameras", label: "Cameras", icon: Cctv, to: "/staff/cameras" },
   { section: "bulk", label: "Bulk revocation", icon: Landmark, to: "/staff/bulk-revocation" },
   { section: "audit", label: "Audit log", icon: ScrollText, to: "/staff/audit" },
+  { section: "oversight", label: "AI oversight", icon: Eye, to: "/staff/ai-oversight" },
 ];
 
 export function StaffNav({ active }: { active: StaffSection }) {
@@ -25,6 +32,7 @@ export function StaffNav({ active }: { active: StaffSection }) {
         <Link
           key={section}
           to={to}
+          activeOptions={{ exact: true }}
           className="staff-nav"
           aria-current={active === section ? "page" : undefined}
         >

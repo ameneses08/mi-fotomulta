@@ -200,6 +200,8 @@ export const assistantScripts = {
  */
 export const analysisScripts = {
   label: "AI analysis – an inspector decides",
+  oversightNote:
+    "AI prepares, sorts and flags. A named official decides. Every AI action is logged and cannot be edited.",
   summary: "{passed} of {total} checks passed; {flags} need an inspector. {brief}",
   refundSummary: "{passed} of {total} checks passed; {flags} need an inspector.",
   intakeSteps: [

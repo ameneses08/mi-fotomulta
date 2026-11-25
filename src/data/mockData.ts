@@ -27,7 +27,7 @@ import {
 export const DEMO_TODAY = "2026-11-25";
 
 /** Version of this seed. Saved demos from another version are discarded on load. */
-export const DEMO_DATA_VERSION = 6;
+export const DEMO_DATA_VERSION = 7;
 
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
@@ -608,6 +608,117 @@ function seedEntry(
   };
 }
 
+/**
+ * Earlier decisions this month on cases no longer in the queue, so the AI oversight panel has
+ * history. Fictional, like everything else.
+ */
+const historicDecisions: AuditEntry[] = [
+  [
+    "C-1031",
+    "2026-11-03T10:12:00.000Z",
+    "Revoke",
+    "Revoke",
+    "Camera not authorised on the infraction date",
+  ],
+  [
+    "C-1033",
+    "2026-11-05T15:40:00.000Z",
+    "Uphold",
+    "Uphold",
+    "Plate and camera verified; no new evidence",
+  ],
+  [
+    "C-1035",
+    "2026-11-10T09:05:00.000Z",
+    "Revoke",
+    "Revoke",
+    "Signed statement and licence identify another driver",
+  ],
+  [
+    "C-1036",
+    "2026-11-12T11:20:00.000Z",
+    "Partly uphold",
+    "Uphold",
+    "Speed reading valid, but the fine used the wrong amount band",
+  ],
+  [
+    "C-1038",
+    "2026-11-17T16:45:00.000Z",
+    "Schedule hearing",
+    "Revoke",
+    "The citizen asked to be heard in person",
+  ],
+  [
+    "C-1039",
+    "2026-11-19T10:30:00.000Z",
+    "Uphold",
+    "Uphold",
+    "Notification on time; claim gives no new facts",
+  ],
+]
+  .flatMap(([caseId = "", timestamp = "", chose = "", suggested = "", reason = ""]) => {
+    const response =
+      chose === suggested
+        ? "accepted"
+        : ["Revoke", "Uphold", "Partly uphold"].includes(chose)
+          ? "overridden"
+          : "not followed";
+    return [
+      seedEntry(
+        caseId,
+        timestamp,
+        INSPECTOR_NAME,
+        "Status changed",
+        reason,
+        chose === "Schedule hearing" ? "Hearing scheduled" : "Decided",
+      ),
+      seedEntry(
+        caseId,
+        timestamp,
+        INSPECTOR_NAME,
+        `AI suggestion ${response}`,
+        `AI suggested "${suggested}"; inspector chose "${chose}".`,
+      ),
+      seedEntry(
+        caseId,
+        timestamp,
+        "AI assistant",
+        "Citizen message drafted",
+        "Draft built from the inspector's reason (level S).",
+      ),
+    ];
+  })
+  .concat([
+    seedEntry(
+      "C-1033",
+      "2026-11-05T15:30:00.000Z",
+      INSPECTOR_NAME,
+      "AI flag confirmed",
+      "Plate in the image matches RUNT",
+    ),
+    seedEntry(
+      "C-1036",
+      "2026-11-12T11:05:00.000Z",
+      INSPECTOR_NAME,
+      "AI flag confirmed",
+      "Filed within 11 working days of notification",
+    ),
+    seedEntry(
+      "C-1037",
+      "2026-11-14T09:50:00.000Z",
+      INSPECTOR_NAME,
+      "AI flag confirmed",
+      "Photo metadata consistent with capture",
+    ),
+    seedEntry(
+      "C-1038",
+      "2026-11-17T16:30:00.000Z",
+      INSPECTOR_NAME,
+      "AI flag dismissed as false positive",
+      "Names consistent across documents: second surname abbreviated on the licence; same person",
+    ),
+  ]);
+
 export const initialAudit: AuditEntry[] = [
   ...challenges.map((c) =>
     seedEntry(
@@ -634,6 +745,15 @@ export const initialAudit: AuditEntry[] = [
     "Case assigned",
     `Assigned to ${INSPECTOR_LABEL}`,
   ),
+  seedEntry(
+    "C-1044",
+    "2026-11-16T08:32:00.000Z",
+    "System",
+    "Status changed",
+    "Paused by fraud screening: power of attorney expired on 31 Oct 2026",
+    "Needs correction",
+  ),
+  ...historicDecisions,
 ];
 
 /** Prefilled mock sign-in values so the recording is quick. Not real credentials. */
