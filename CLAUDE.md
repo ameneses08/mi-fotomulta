@@ -58,10 +58,12 @@ formatting errors, 7 react-refresh warnings inside generated shadcn/ui files).
 
 ```
 src/routes/       TanStack file routes – thin: params + head + render one screen
-src/screens/      home/, citizen/ (+ challenge/), staff/{queue,case,acts}/, demo/
+src/screens/      signin/, citizen/ (+ challenge/), staff/{inbox,case,group,cameras,bulk,
+                  refunds,audit}/, demo/
 src/components/   reusable UI: StatusBadge, StageTracker, ProgressSteps, AIPanel, SourceTag,
-                  DataRow, RuleCheckList, LegalClockBar, AuditLog, Notice; layout/ holds
-                  SiteHeader, CitizenLayout, StaffLayout, DemoControls
+                  DataRow, RuleCheckList, LevelBadge, LegalClockBar, AuditLog, Notice;
+                  assistant/ (citizen chat panel + launcher); layout/ holds SiteHeader,
+                  BrandFooter, CitizenLayout/Nav, UserMenu, StaffLayout/Nav, DemoControls
 src/components/ui shadcn/ui primitives (generated, Lovable template)
 src/types/        entities.ts (Fine, Camera, LegalAct, ChallengeCase, RefundCase, AuditEntry,
                   Consent, RuleCheck…) and status.ts (all status/union types)
@@ -75,12 +77,17 @@ src/lib/          pure functions + *.test.ts:
                   revocation.ts   bulk act preview and registration (one audit entry per fine)
                   refund.ts       bank details, consent, R12 auto-verification, refund decisions
                   challenge.ts    wizard validation, request drafting, submission, auto-checks
-                  queue.ts        S1 rows, risk sorting, grouping, summary
+                  queue.ts        inbox triage (priority), groups, filters, summary
+                  refundQueue.ts  refund sections and fraud flags
+                  assistant.ts    citizen assistant intents and answers from live state
+                  citizenSummary  dashboard cards; cameras.ts camera status and range
+                  audit.ts        audit-log filters; assignment.ts; signIn.ts mock validation
                   messages.ts     status messages, holder label, tracker stages, citizen history
                   brief.ts        scripted AI case brief and citizen-message drafts
                   format.ts       money, dates, {placeholder} templates
 src/store/        appStore.ts (state + actions), selectors.ts (memoised derived reads),
-                  demoClock.ts (demo timestamps and cancellable simulated delays)
+                  demoClock.ts (demo timestamps and cancellable simulated delays),
+                  useDemoHydration.ts (restores sessionStorage after mount)
 src/hooks/        useHighlightOnChange (tracker flash when the status changes)
 ```
 
@@ -126,7 +133,13 @@ Demo behaviour
 - **Fixed demo date: 25 Nov 2026** (`DEMO_TODAY`). Legal clocks and expected dates are computed
   from it so the recording is deterministic. Audit timestamps use that date with the real time
   of day.
-- **No persistence** (Lovable guidance: no browser storage). A full reload resets the demo.
+- **sessionStorage persistence (iteration 2).** The store is saved per tab so a reload keeps
+  the demo; Demo controls → either reset overwrites it. This replaces the earlier "no browser
+  storage" choice because a reload mid-recording must not lose state. Hydration runs after
+  mount (`skipHydration`) so server HTML matches the first client render; interrupted
+  simulations (automatic checks, refund verification) are rescheduled. `DEMO_DATA_VERSION` must
+  be bumped whenever the seed changes; a saved demo from another version is replaced by the
+  fresh seed.
 - C-1042 is seeded in "Validating" so `/staff` and `/demo` work immediately. Demo controls →
   "Reset to before Marta's challenge" removes it so the citizen journey starts fresh.
   Submitting C3 always creates a new submission at "Received" (replacing any earlier C-1042);
@@ -147,11 +160,42 @@ Rules (R1–R12)
 - Only applicable rules are listed: R7 for "I wasn't driving", R8 for "Vehicle sold", R10 only
   for fines on non-compliant cameras, R2 is applied at fine level (no case is created).
 - R5 notification window: 3 working days after the infraction (assumption).
-- R9: cases filed by a representative are flagged as templated; grouping is overview only.
-- R12: human approval above COP 2,000,000 (`RULES_CONFIG.refundHumanThreshold`) or when the
-  holder is not the claimant.
+- R9: represented cases are flagged as templated unless they add evidence beyond the power of
+  attorney ("New evidence"); grouping saves reading time, never replaces individual review.
+- R12: human approval above **COP 1,000,000** (`RULES_CONFIG.refundHumanThreshold`, assumption
+  pending P6) or when the holder is not the claimant.
+- Refund fraud flags: holder ≠ claimant; a later claim on a fine already claimed (the first is
+  legitimate); one account (bank + last 4) paying three or more claimants. Flags only route a
+  refund to a person; every refund action needs a written reason.
 - Decision "Request correction" uses the inspector's reason as `{what}`; "Schedule hearing" sets
   a virtual hearing 5 working days later at 09:30.
+
+Iteration 2 (UX, assistant, P6 staff screens)
+
+- Palette from the "Manual de uso de marca ciudad Bogotá" (June 2026): primary #225495, muted
+  #595A5C, brand red #E4032E only for the 4px header strip and footer, Movilidad lime #BED000
+  only behind dark text (header tag). No coat of arms or city logo. Contrast: primary on white
+  7.6:1, white on red 4.8:1, text on lime 10.3:1, muted on white 6.9:1. Card borders stay
+  #E5E7EB (decorative); form controls use #85878A (3.6:1) for WCAG 1.4.11.
+- `/` is a mock sign-in (Cédula Digital button, CC/CE/PPT + 6-digit code, staff username and
+  password), prefilled from `MOCK_SIGN_IN`. Nothing is validated against a server.
+- Citizen screens use Tailwind container queries, not viewport media queries, so the same
+  components render wide on desktop and narrow inside the `/demo` phone frame. In the frame the
+  shell is "embedded" (no nav, which would leave `/demo`).
+- The assistant is scripted: four intents matched by keywords, answers filled from derived
+  statuses, SLA deadlines and the legal act at the moment of asking (so a later answer reflects
+  a later state). Chat history is part of the persisted demo state. ~800 ms typing delay.
+- P6 levels: A automated (camera check, per-fine application, notices, auto-approved refunds),
+  S AI-supported (summary, suggestion, citizen message draft), H human only (final decision,
+  signing the act, held and flagged refunds).
+- Inspector responses to the AI are audited as "accepted" (same outcome), "overridden"
+  (different final outcome, reason required) or "not followed" (correction or hearing instead).
+  The AI draft and the inspector's approval of the citizen message are separate entries.
+- Inbox priority: High if the legal clock is at risk/overdue or a check fails, Medium if any
+  flag, Low otherwise. Assignment changes the holder and is audited; it never changes status.
+- Camera CAM-AN170 now has an authorisation that expired on 30 Sep 2026 (for the "Expired"
+  state); its fines after that date are still non-compliant.
+- Refund queue seed adds R-1050–R-1053 (10 refunds in total) to populate the three sections.
 
 Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
 

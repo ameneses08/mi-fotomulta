@@ -22,15 +22,15 @@ npm run check      # typecheck, lint, unit tests and production build
 
 Other scripts: `npm run test`, `npm run lint`, `npm run typecheck`, `npm run build`.
 
-State lives in memory only. **A full page reload resets the demo**; navigate with the in-app
-links and buttons. Staff and demo pages have a **Demo controls** button (bottom right) to reset.
+Demo state is saved in the browser tab (sessionStorage), so a reload keeps it. Staff and demo
+pages have a **Demo controls** button (bottom right) with two resets.
 
 ## Folder structure
 
 ```
 src/
   routes/       TanStack Start file routes (thin: params, page title, one screen)
-  screens/      screen components – home/, citizen/, staff/, demo/
+  screens/      screen components – signin/, citizen/, staff/, demo/
   components/   reusable UI – StatusBadge, StageTracker, AIPanel, SourceTag, layouts…
   components/ui shadcn/ui primitives (from the Lovable template)
   types/        domain entities and status unions
@@ -44,51 +44,59 @@ See [CLAUDE.md](CLAUDE.md) for the architecture, conventions and every design de
 
 ## Screens
 
-| Route                          | Screen                                                 |
-| ------------------------------ | ------------------------------------------------------ |
-| `/`                            | Home: choose citizen, staff or the split-screen demo   |
-| `/citizen`                     | C1 My fines and "Money to recover"                     |
-| `/citizen/fines/:id`           | C2 Fine detail with data sources and "Explain my fine" |
-| `/citizen/fines/:id/challenge` | C3 Four-step guided challenge                          |
-| `/citizen/cases/:id`           | C4 Case tracker                                        |
-| `/citizen/refunds/:id`         | C5 Refund with bank account and separate consent       |
-| `/staff`                       | S1 Queue with legal clocks, rule flags and grouping    |
-| `/staff/cases/:id`             | S2 Case detail: claim, AI brief, rule checks, decision |
-| `/staff/legal-acts`            | S3 Bulk-revocation act (Scenario B → A)                |
-| `/demo`                        | D1 Citizen phone and inspector screen for case C-1042  |
+| Route                          | Screen                                                         |
+| ------------------------------ | -------------------------------------------------------------- |
+| `/`                            | Mock sign-in: Citizen or SDM staff                             |
+| `/citizen`                     | My fines: summary cards, fine grid, assistant                  |
+| `/citizen/fines/:id`           | Fine detail with data sources, next action, "Explain my fine"  |
+| `/citizen/fines/:id/challenge` | Four-step guided challenge                                     |
+| `/citizen/cases`, `/:id`       | My cases and the case tracker                                  |
+| `/citizen/refunds/:id`         | Refund with bank account and separate consent                  |
+| `/citizen/help`                | Línea 195 and Centros de Servicios de Movilidad                |
+| `/staff`                       | Inspector inbox: priority, groups, filters, assignment         |
+| `/staff/cases/:id`             | Case view: original filing, AI summary, flags, decision        |
+| `/staff/groups/:id`            | Group view: similar cases listed and decided one by one        |
+| `/staff/refunds`               | Refund queue: auto-approved sample, held, fraud flags          |
+| `/staff/cameras`               | Camera check: Authorised / Expired / Unauthorised              |
+| `/staff/bulk-revocation`       | Legal act, affected fines, notification preview, one signature |
+| `/staff/audit`                 | Read-only, filterable audit log                                |
+| `/demo`                        | Marta's phone and the inspector's case view for C-1042         |
 
 ## Demo script (launch video, ~5 minutes)
 
-Before recording: open `/staff`, click **Demo controls → Reset to before Marta's challenge**,
-then click **Switch role** to return home. Record at 1440×900.
+Before recording: open `/demo`, click **Demo controls → Reset to before Marta's challenge**, then
+**Exit demo**. Record at 1440×900.
 
-1. **Home** – read the tagline, click **I'm a citizen**.
-2. **My fines (C1)** – six fines with statuses derived by the rules engine. Point out
-   F-2042 "Under review", F-2044 "Refund on hold", F-2046 "Another authority".
-3. Open **F-2041 (C2)** – data rows tagged _From SIMIT / RUNT / ANSV_ and "We already have
-   this information". Show the **Explain my fine** AI panel. Click **Challenge this fine**.
-4. **Challenge (C3)** – reason _I wasn't driving_ → Continue. Paste any sentence into "Paste
-   text from your own AI assistant" → **Turn into a structured claim** → Continue. **Use
-   sample documents** (AI evidence check updates) → Continue. Review the AI-drafted request →
-   **Submit challenge**.
-5. **Tracker (C4)** – "Received", then after ~3 seconds automatic checks finish: "Being
-   checked", held by Inspector Laura Gómez, expected date in working days.
-6. Click the logo → **Open split-screen demo (D1)**. Left: Marta's phone. Right: S2 for C-1042.
-   Walk through the AI brief, the rules it relied on and the A/S/H rule checks (R7 is
-   human-only).
-7. In the decision panel keep **Revoke** (AI suggestion), edit the citizen message if you like,
-   click **Use the AI's suggested reason**, then **Confirm decision**. The phone updates
-   instantly with a highlight: "Decision: Revoked…", hearing shown as skipped. Open the
-   **Audit log** tab: status change plus "AI suggestion accepted".
-8. **Demo controls → Reset demo data**, go to **Queue (S1)** via Switch role → I'm SDM staff:
-   summary cards, legal clocks ("6/10 days"), flags, then **Group similar** → "5 similar cases –
-   LegalRápido S.A.S." with the note that each case is decided individually.
-9. **Legal acts (S3)** – Scenario B banner. **Register act as in force** → 8 fines, COP 1,300,000
-   → type a name → **Sign and register**. Banner flips to Scenario A.
-10. Switch role → **I'm a citizen**: F-2042 and F-2044 are now "Revoked", Money to recover shows
-    "Eligible". Open the refund (C5), enter a fictional account, tick the separate consent,
-    **Confirm bank account** → "Verifying" → automatically "Approved" with an expected
-    payment date.
+1. **Sign-in** – "Citizen" is selected. Click **Continue with Cédula Digital** (or show the
+   document + 6-digit code path; everything is prefilled).
+2. **My fines** – three summary cards and six fines, each with a status and its next step. In the
+   assistant on the right, click **Give me a status check of my fotomultas**: the answer is built
+   from the same live data. Click **Why is F-2042 under review?**.
+3. Open **F-2041** – sources (SIMIT / RUNT / ANSV) on the left, status and next action on the
+   right, **Explain my fine** below. Click **Challenge this fine**.
+4. **Challenge** – reason _I wasn't driving_ → Continue. Paste any sentence into "Paste text from
+   your own AI assistant" → **Turn into a structured claim** → Continue. **Use sample documents**
+   → Continue. Review the AI-drafted request → **Submit challenge**.
+5. **Tracker** – "Received", then after ~3 s "Being checked" by Inspector Laura Gómez with an
+   expected date in working days.
+6. User menu → **Sign out** → **Presenter: open split-screen demo**. Left: Marta's phone
+   (narrow layout, "Ask the assistant" button). Right: the case view of C-1042. Walk through the
+   AI summary (it never replaces the original filing), the flags with A/S/H levels, the camera
+   status, then **Approve suggestion** → the reason is prefilled, the citizen message is an AI
+   draft from that reason → **Approve message and send decision**. The phone updates instantly.
+   Open **Audit log**: decision, "AI suggestion accepted", AI draft and approval.
+7. **Exit demo** → sign in as **SDM staff**. **Inbox**: priorities, legal clocks, flags and the
+   "LegalRápido group · 5" label → open the **group view**: five cases listed individually, one
+   marked "New evidence", no approve-all ("Grouping saves reading time, not review").
+8. **Cameras**: CAM-NQS13 unauthorised, CAM-AN170 expired → **Open affected fines**.
+9. **Bulk revocation**: Scenario B, 8 fines and their total, the notification preview → **Register
+   act as in force** → type a name → **Sign and register**. Scenario A.
+10. **Refunds**: auto-approved sample, R-1050 held above COP 1,000,000, fraud flags (holder
+    mismatch, duplicate claim, one account for three claimants). Reject one with a reason.
+11. **Audit log**: filter by actor "AI assistant", then by case C-1042.
+12. Sign out → citizen: F-2042 and F-2044 now "Revoked"; ask the assistant **When will I get my
+    refund?** → "ready". Open the refund, add a fictional account, tick the separate consent →
+    "Verifying" → "Approved" with an expected payment date.
 
 ## Built with Lovable
 
