@@ -81,6 +81,8 @@ interface DemoData {
   assistantTyping: boolean;
   /** Inspector reviews of AI analysis flags, keyed by finding id. */
   findingReviews: Record<string, FindingReview>;
+  /** Extracted document fields an inspector has checked against the original. */
+  verifiedFields: Record<string, boolean>;
 }
 
 export interface AssistantMessage {
@@ -128,6 +130,7 @@ interface Actions {
   askAssistant: (question: string) => void;
   assignChallenge: (caseId: string, inspector: string) => void;
   appealChallenge: (caseId: string) => string | null;
+  toggleFieldVerified: (key: string) => void;
 }
 
 export type AppState = DemoData & Actions;
@@ -157,6 +160,7 @@ function initialData(preset: DemoPreset = "submitted"): DemoData {
     assistantMessages: [],
     assistantTyping: false,
     findingReviews: {},
+    verifiedFields: {},
   };
 }
 
@@ -195,6 +199,7 @@ function persistedData(state: AppState): DemoData {
     assistantMessages: state.assistantMessages,
     assistantTyping: false,
     findingReviews: state.findingReviews,
+    verifiedFields: state.verifiedFields,
   };
 }
 
@@ -401,6 +406,8 @@ export const useAppStore = create<AppState>()(
           cancelScheduled();
           set(initialData(preset));
         },
+        toggleFieldVerified: (key) =>
+          set((s) => ({ verifiedFields: { ...s.verifiedFields, [key]: !s.verifiedFields[key] } })),
         appealChallenge: (caseId) => {
           const { challenges: all, citizen: owner } = get();
           const current = all.find((c) => c.id === caseId);

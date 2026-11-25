@@ -5,6 +5,7 @@ import type { ChallengeCase } from "@/types";
 import { BriefColumn } from "./BriefColumn";
 import { ClaimColumn } from "./ClaimColumn";
 import { DecisionPanel } from "./DecisionPanel";
+import { DocumentsTab } from "./DocumentsTab";
 
 interface ChallengeDetailProps {
   challenge: ChallengeCase;
@@ -18,6 +19,7 @@ export function ChallengeDetail({ challenge, compact = false }: ChallengeDetailP
     <Tabs defaultValue="case">
       <TabsList>
         <TabsTrigger value="case">Case</TabsTrigger>
+        <TabsTrigger value="documents">Documents ({challenge.evidence.length})</TabsTrigger>
         <TabsTrigger value="audit">Audit log ({audit.length})</TabsTrigger>
       </TabsList>
       <TabsContent value="case">
@@ -27,6 +29,9 @@ export function ChallengeDetail({ challenge, compact = false }: ChallengeDetailP
           {/* Remount when the status changes so the form resets to the next valid decision. */}
           <DecisionPanel key={challenge.status} challenge={challenge} />
         </div>
+      </TabsContent>
+      <TabsContent value="documents">
+        <DocumentsTab challenge={challenge} />
       </TabsContent>
       <TabsContent value="audit" className="mt-6">
         <AuditLog entries={audit} />
