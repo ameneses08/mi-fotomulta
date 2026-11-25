@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ClipboardList, Radio, Smartphone } from "lucide-react";
+import { CitizenLayout } from "@/components/layout/CitizenLayout";
 import { DemoControls } from "@/components/layout/DemoControls";
 import { HERO_CASE_ID } from "@/data/mockData";
 import { useChallenge } from "@/store/selectors";
@@ -30,7 +31,9 @@ export function DemoScreen() {
           </h2>
           <div className="phone-frame">
             <div className="phone-screen">
-              <CaseView caseId={HERO_CASE_ID} />
+              <CitizenLayout embedded>
+                <CaseView caseId={HERO_CASE_ID} />
+              </CitizenLayout>
             </div>
           </div>
         </section>

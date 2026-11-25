@@ -17,16 +17,18 @@ export function HelpFooter() {
 interface CitizenLayoutProps {
   children: ReactNode;
   back?: { to: "/citizen" | "/citizen/cases"; label: string };
+  /** Inside the /demo phone frame: no nav (it would leave the demo page). */
+  embedded?: boolean;
 }
 
 /**
  * Container-query layout: wide containers get a main column and a sticky right column; narrow
  * containers (phones and the /demo phone frame) stack everything in one column.
  */
-export function CitizenLayout({ children, back }: CitizenLayoutProps) {
+export function CitizenLayout({ children, back, embedded = false }: CitizenLayoutProps) {
   return (
-    <div className="@container citizen-app">
-      <CitizenNav />
+    <div className={embedded ? "@container citizen-app embedded" : "@container citizen-app"}>
+      {!embedded && <CitizenNav />}
       <div className="citizen-body @4xl:grid-cols-[minmax(0,1fr)_340px]">
         <main className="@container min-w-0">
           {back && (
