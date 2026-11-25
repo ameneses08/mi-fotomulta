@@ -28,7 +28,7 @@ export function ChallengeScreen({ id }: { id: string }) {
   if (!fine) return <NotFoundScreen label="Fine" />;
   if (fine.paidOn || status === "Another authority" || status === "Revoked") {
     return (
-      <CitizenLayout>
+      <CitizenLayout back={{ to: "/citizen", label: "My fines" }}>
         <h1 className="page-title">Challenge not available</h1>
         <p className="page-subtitle">
           This fine is paid, revoked or issued by another authority, so it cannot be challenged
@@ -45,7 +45,7 @@ export function ChallengeScreen({ id }: { id: string }) {
   };
 
   return (
-    <CitizenLayout>
+    <CitizenLayout back={{ to: "/citizen", label: "My fines" }}>
       <h1 className="page-title">Challenge this fine</h1>
       <p className="page-subtitle">
         {fine.id} · {formatCOP(fine.amount)}

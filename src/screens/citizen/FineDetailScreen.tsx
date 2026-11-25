@@ -30,7 +30,7 @@ export function FineDetailScreen({ id }: { id: string }) {
   const authorised = isCameraAuthorisedOn(camera, fine.infractionDate);
 
   return (
-    <CitizenLayout>
+    <CitizenLayout back={{ to: "/citizen", label: "My fines" }}>
       <div className="flex items-start justify-between gap-2">
         <h1 className="page-title">Fine details</h1>
         <StatusBadge text={status} tone={FINE_STATUS_TONES[status]} />

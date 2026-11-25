@@ -24,7 +24,7 @@ export function MyFinesScreen() {
   const amount = recoverableAmount(refunds, citizen.document);
 
   return (
-    <CitizenLayout back={{ to: "/", label: "Home" }}>
+    <CitizenLayout>
       <h1 className="page-title">Hello, {citizen.firstName}</h1>
       <p className="page-subtitle">Here is where your photo-fines stand.</p>
       <section className="panel money-panel" aria-labelledby="money-title">

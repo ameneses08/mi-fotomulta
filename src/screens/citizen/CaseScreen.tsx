@@ -7,7 +7,7 @@ export function CaseScreen({ id }: { id: string }) {
   const challenge = useChallenge(id);
   if (!challenge) return <NotFoundScreen label="Case" />;
   return (
-    <CitizenLayout>
+    <CitizenLayout back={{ to: "/citizen/cases", label: "My cases" }}>
       <CaseView caseId={id} />
     </CitizenLayout>
   );
