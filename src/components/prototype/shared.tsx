@@ -33,7 +33,7 @@ export function SiteHeader() {
         <Info size={15} />
         <span>
           Academic prototype – not an official service of the Alcaldía de Bogotá. AI responses are
-          simulated unless marked Live.
+          simulated.
         </span>
       </div>
       <header className="site-header">
