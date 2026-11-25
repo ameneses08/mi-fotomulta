@@ -46,3 +46,8 @@ export type StageState = "done" | "current" | "upcoming" | "skipped";
 export type LegalActStatus = "Draft" | "In force";
 
 export type ClockRisk = "On track" | "At risk" | "Overdue";
+
+export type DecisionKind =
+  "Revoke" | "Uphold" | "Partly uphold" | "Schedule hearing" | "Request correction";
+
+export type RefundDecisionKind = "Approve" | "Request correction" | "Reject";
