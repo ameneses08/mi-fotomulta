@@ -642,9 +642,9 @@
   padding-top: 12px;
   border-top: 4px solid var(--border);
   color: var(--muted-foreground);
-  font-size: 12px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.35;
+  hyphens: auto;
   list-style: none;
 }
 .stage-segment.current {
