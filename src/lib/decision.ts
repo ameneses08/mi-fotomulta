@@ -39,6 +39,23 @@ const ALL_DECISIONS: DecisionKind[] = [
   "Request correction",
 ];
 
+export type AiResponse = "accepted" | "overridden" | "ignored";
+
+const AI_RESPONSE_ACTIONS: Record<AiResponse, string> = {
+  accepted: "AI suggestion accepted",
+  overridden: "AI suggestion overridden",
+  ignored: "AI suggestion not followed",
+};
+
+/**
+ * Accepted: the inspector took the suggestion. Overridden: a different final outcome.
+ * Ignored: the inspector chose a procedural step (correction, hearing) instead.
+ */
+export function aiResponseFor(kind: DecisionKind, suggestion: DecisionKind): AiResponse {
+  if (kind === suggestion) return "accepted";
+  return OUTCOMES[kind] ? "overridden" : "ignored";
+}
+
 /** Decisions the inspector may take from the current status (follows the transition table). */
 export function availableDecisions(status: ChallengeStatus): DecisionKind[] {
   if (status === "Validating") return ALL_DECISIONS;
@@ -111,13 +128,25 @@ export function applyDecision(challenge: ChallengeCase, input: DecisionInput): D
     hadHearing: challenge.hadHearing || input.kind === "Schedule hearing",
     ...(outcome ? { outcome } : {}),
   };
-  const accepted = input.kind === input.aiSuggestion;
-  const aiEntry = createAuditEntry({
-    caseId: challenge.id,
-    actor: input.inspector,
-    action: accepted ? "AI suggestion accepted" : "AI suggestion overridden",
-    reason: `AI suggested "${input.aiSuggestion}"; inspector chose "${input.kind}".`,
-    timestamp: input.timestamp,
-  });
-  return { ok: true, entity, audit: [result.audit, aiEntry] };
+  const response = aiResponseFor(input.kind, input.aiSuggestion);
+  const entry = (actor: string, action: string, reason: string) =>
+    createAuditEntry({ caseId: challenge.id, actor, action, reason, timestamp: input.timestamp });
+  return {
+    ok: true,
+    entity,
+    audit: [
+      result.audit,
+      entry(
+        input.inspector,
+        AI_RESPONSE_ACTIONS[response],
+        `AI suggested "${input.aiSuggestion}"; inspector chose "${input.kind}".`,
+      ),
+      entry(
+        "AI assistant",
+        "Citizen message drafted",
+        "Draft built from the inspector's reason (level S).",
+      ),
+      entry(input.inspector, "Citizen message approved and sent", input.citizenMessage.trim()),
+    ],
+  };
 }

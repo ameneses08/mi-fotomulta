@@ -56,15 +56,15 @@ export const aiScripts = {
   requestTemplate,
   citizenMessageDrafts: {
     Revoke:
-      "Dear {first_name}, we reviewed your challenge and revoked fine {fine_id}. You do not need to pay it. If you already paid, you can claim a refund in this app.",
+      "Dear {first_name}, we reviewed your challenge and revoked fine {fine_id}. Reason: {reason}. You do not need to pay it. If you already paid, you can claim a refund in this app.",
     Uphold:
-      "Dear {first_name}, we reviewed your challenge and kept fine {fine_id}. The evidence does not show an error. You can pay the fine or appeal by the date shown.",
+      "Dear {first_name}, we reviewed your challenge and kept fine {fine_id}. Reason: {reason}. You can pay the fine or appeal by the date shown.",
     "Partly uphold":
-      "Dear {first_name}, we partly accepted your challenge on fine {fine_id}, as explained in the reason. You can appeal by the date shown.",
+      "Dear {first_name}, we partly accepted your challenge on fine {fine_id}. Reason: {reason}. You can appeal by the date shown.",
     "Schedule hearing":
-      "Dear {first_name}, we need to hear you before deciding on fine {fine_id}. Please attend on the date shown and bring your ID and original documents.",
+      "Dear {first_name}, we need to hear you before deciding on fine {fine_id}: {reason}. Please attend on the date shown and bring your ID and original documents.",
     "Request correction":
-      "Dear {first_name}, to keep reviewing fine {fine_id} we need one more document. Please send it before the date shown so your case stays open.",
+      "Dear {first_name}, to keep reviewing fine {fine_id} we need {reason}. Please send it before the date shown so your case stays open.",
   } satisfies Record<DecisionKind, string>,
   caseBriefs: {
     "C-1042": {

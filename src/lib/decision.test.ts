@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { applyDecision, availableDecisions, type DecisionInput } from "@/lib/decision";
+import {
+  aiResponseFor,
+  applyDecision,
+  availableDecisions,
+  type DecisionInput,
+} from "@/lib/decision";
 import { makeChallenge } from "@/test/fixtures";
 
 const input: DecisionInput = {
@@ -11,6 +16,23 @@ const input: DecisionInput = {
   today: "2026-11-25",
   timestamp: "2026-11-25T11:00:00.000Z",
 };
+
+describe("aiResponseFor", () => {
+  it("classifies the inspector's response to the AI suggestion", () => {
+    expect(aiResponseFor("Revoke", "Revoke")).toBe("accepted");
+    expect(aiResponseFor("Uphold", "Revoke")).toBe("overridden");
+    expect(aiResponseFor("Request correction", "Revoke")).toBe("ignored");
+  });
+
+  it("records an ignored suggestion in the audit log", () => {
+    const result = applyDecision(makeChallenge(), {
+      ...input,
+      kind: "Schedule hearing",
+      reason: "Hear the driver",
+    });
+    expect(result.ok && result.audit[1]?.action).toBe("AI suggestion not followed");
+  });
+});
 
 describe("availableDecisions", () => {
   it("offers all five decisions while validating", () => {
@@ -49,7 +71,10 @@ describe("applyDecision", () => {
     expect(result.ok && result.audit.map((a) => a.action)).toEqual([
       "Status changed",
       "AI suggestion accepted",
+      "Citizen message drafted",
+      "Citizen message approved and sent",
     ]);
+    expect(result.ok && result.audit[2]?.actor).toBe("AI assistant");
   });
 
   it("records an override when the inspector disagrees with the AI", () => {

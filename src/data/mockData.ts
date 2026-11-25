@@ -59,7 +59,12 @@ export const cameras: Camera[] = [
   { id: "CAM-BOY80", location: "Av. Boyacá con Calle 80", authorisedFrom: "2024-03-01" },
   { id: "CAM-NQS13", location: "Av. NQS con Calle 13" },
   { id: "CAM-CALI26", location: "Av. Ciudad de Cali con Calle 26", authorisedFrom: "2023-08-15" },
-  { id: "CAM-AN170", location: "Autopista Norte con Calle 170" },
+  {
+    id: "CAM-AN170",
+    location: "Autopista Norte con Calle 170",
+    authorisedFrom: "2024-01-15",
+    authorisedUntil: "2026-09-30",
+  },
   { id: "CAM-CAR63", location: "Av. Caracas con Calle 63", authorisedFrom: "2024-01-10" },
   { id: "CAM-SOA01", location: "Autopista Sur, sector San Mateo", authorisedFrom: "2024-05-01" },
   { id: "CAM-68-13", location: "Av. Carrera 68 con Calle 13", authorisedFrom: "2023-02-01" },

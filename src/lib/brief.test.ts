@@ -18,7 +18,8 @@ describe("draftCitizenMessage", () => {
     const message = draftCitizenMessage(
       "Revoke",
       makeChallenge({ citizenName: "Marta Rodríguez" }),
+      "The driver was identified.",
     );
-    expect(message).toMatch(/^Dear Marta, .*fine F-1/);
+    expect(message).toMatch(/^Dear Marta, .*fine F-1\. Reason: the driver was identified\. /);
   });
 });

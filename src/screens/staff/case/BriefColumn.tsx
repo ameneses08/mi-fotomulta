@@ -12,7 +12,7 @@ export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
   return (
     <section className="staff-column" aria-labelledby="brief-title">
       <h2 id="brief-title" className="column-title">
-        Case brief
+        AI summary
       </h2>
       <AIPanel title="Summary and suggested outcome" audience="staff" className="mt-0">
         <p>{brief.brief}</p>
@@ -29,7 +29,10 @@ export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
           ))}
         </ul>
       </AIPanel>
-      <h3 className="column-subtitle">Rule checks</h3>
+      <p className="mt-2 text-xs text-muted-foreground">
+        The summary never replaces the original filing. Read both.
+      </p>
+      <h3 className="column-subtitle">Flags and checks</h3>
       <p className="mb-3 text-xs text-muted-foreground">
         A = automated · S = AI-supported, human signs off · H = human only. Checks route a case;
         they never close it.

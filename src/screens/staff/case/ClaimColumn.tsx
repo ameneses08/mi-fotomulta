@@ -1,37 +1,41 @@
 import { FileText } from "lucide-react";
 import { DataRow } from "@/components/DataRow";
-import { StatusBadge } from "@/components/StatusBadge";
 import { FACT_QUESTIONS } from "@/data/mockData";
 import { formatCOP, formatDate } from "@/lib/format";
-import { isCameraAuthorisedOn } from "@/lib/rules";
 import { useAppStore } from "@/store/appStore";
 import { useFine } from "@/store/selectors";
 import type { ChallengeCase } from "@/types";
+import { CameraStatusRow } from "./CameraStatusRow";
 
 export function ClaimColumn({ challenge }: { challenge: ChallengeCase }) {
   const fine = useFine(challenge.fineId);
   const camera = useAppStore((s) => s.cameras.find((c) => c.id === fine?.cameraId));
-  const authorised = fine ? isCameraAuthorisedOn(camera, fine.infractionDate) : false;
 
   return (
     <section className="staff-column" aria-labelledby="claim-title">
       <h2 id="claim-title" className="column-title">
-        Structured claim
+        Original filing
       </h2>
       <p className="text-sm text-muted-foreground">
-        {challenge.citizenName} · {challenge.reason}
+        {challenge.citizenName} · {challenge.reason} · filed {formatDate(challenge.submittedOn)}
         {challenge.representative && ` · via ${challenge.representative}`}
       </p>
-      <dl className="mt-3 grid gap-3">
-        {challenge.facts.map((fact, index) => (
-          <div key={index}>
-            <dt className="text-xs font-semibold uppercase text-muted-foreground">
-              {FACT_QUESTIONS[index] ?? "Statement"}
-            </dt>
-            <dd className="text-sm">{fact}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="original-filing" tabIndex={0} aria-label="Original filing text">
+        {challenge.request}
+      </div>
+      <details className="mt-3">
+        <summary className="cursor-pointer text-sm font-semibold">Citizen's answers</summary>
+        <dl className="mt-2 grid gap-3">
+          {challenge.facts.map((fact, index) => (
+            <div key={index}>
+              <dt className="text-xs font-semibold uppercase text-muted-foreground">
+                {FACT_QUESTIONS[index] ?? "Statement"}
+              </dt>
+              <dd className="text-sm">{fact}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
       <h3 className="column-subtitle">Evidence</h3>
       {challenge.evidence.length ? (
         <ul className="grid gap-2">
@@ -62,16 +66,7 @@ export function ClaimColumn({ challenge }: { challenge: ChallengeCase }) {
               value={`${fine.plate} / ${fine.imagePlate}`}
               source="RUNT"
             />
-            <DataRow
-              label={`Camera ${fine.cameraId}`}
-              value={
-                <StatusBadge
-                  text={authorised ? "Authorised" : "Not authorised"}
-                  tone={authorised ? "success" : "warning"}
-                />
-              }
-              source="ANSV"
-            />
+            <CameraStatusRow camera={camera} fine={fine} />
           </dl>
         </>
       )}
