@@ -1,3 +1,4 @@
+import { RuleText } from "@/components/RuleCode";
 import { Link } from "@tanstack/react-router";
 import { AnalysisReport } from "@/components/analysis/AnalysisReport";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -25,7 +26,7 @@ export function RefundItem({ item }: { item: RefundQueueItem }) {
       <AnalysisReport analysis={item.analysis} compact />
       {section === "autoApproved" ? (
         <p className="text-sm text-muted-foreground">
-          Approved automatically by the system (R11, R12). Sampled for audit.
+          <RuleText text="Approved automatically by the system (R11, R12). Sampled for audit." />
         </p>
       ) : (
         <RefundActions refund={refund} />

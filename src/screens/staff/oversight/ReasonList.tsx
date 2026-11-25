@@ -1,3 +1,4 @@
+import { RuleText } from "@/components/RuleCode";
 import type { OversightReason } from "@/lib/oversight";
 
 export function ReasonList({
@@ -18,7 +19,7 @@ export function ReasonList({
         <ul className="mt-2 grid gap-2">
           {reasons.map((item, index) => (
             <li key={`${item.caseId}-${index}`} className="text-sm">
-              <span className="font-medium">{item.caseId}</span> – {item.reason}
+              <span className="font-medium">{item.caseId}</span> – <RuleText text={item.reason} />
             </li>
           ))}
         </ul>

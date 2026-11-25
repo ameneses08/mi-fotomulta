@@ -1,3 +1,4 @@
+import { RuleText } from "@/components/RuleCode";
 import { formatTimestamp } from "@/lib/format";
 import type { AuditEntry } from "@/types";
 
@@ -20,7 +21,9 @@ export function AuditLog({ entries }: { entries: AuditEntry[] }) {
           <time dateTime={entry.timestamp}>
             {formatTimestamp(entry.timestamp)} · {entry.actor}
           </time>
-          <p>{entry.reason}</p>
+          <p>
+            <RuleText text={entry.reason} />
+          </p>
         </li>
       ))}
     </ol>

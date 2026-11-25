@@ -1071,6 +1071,12 @@
   border-radius: 10px;
   background: var(--muted);
   border: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: help;
+}
+.rule-chip:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
 }
 .segment {
   display: grid;

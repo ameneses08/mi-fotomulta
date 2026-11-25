@@ -1,3 +1,4 @@
+import { RuleText } from "@/components/RuleCode";
 import { Lock } from "lucide-react";
 import { useMemo, useState } from "react";
 import { StaffLayout } from "@/components/layout/StaffLayout";
@@ -61,7 +62,9 @@ export function AuditScreen() {
                 <td className="text-sm">
                   {entry.to ? `${entry.from ? `${entry.from} → ` : ""}${entry.to}` : "—"}
                 </td>
-                <td className="max-w-[360px] text-sm text-muted-foreground">{entry.reason}</td>
+                <td className="max-w-[360px] text-sm text-muted-foreground">
+                  <RuleText text={entry.reason} />
+                </td>
               </tr>
             ))}
           </tbody>

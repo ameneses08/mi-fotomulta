@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { LevelBadge } from "@/components/LevelBadge";
+import { RuleCode } from "@/components/RuleCode";
 import { StatusBadge } from "@/components/StatusBadge";
 import { FINDING_RESULT_TONES } from "@/data/statusMessages";
 import type { AnalysisFinding } from "@/types";
@@ -19,7 +20,7 @@ export function FindingRow({ finding, children }: FindingRowProps) {
         <span className="flex flex-wrap items-center gap-2">
           <ConfidenceBadge confidence={finding.confidence} />
           <LevelBadge level={finding.level} />
-          {finding.ruleId && <span className="rule-chip">{finding.ruleId}</span>}
+          {finding.ruleId && <RuleCode ruleId={finding.ruleId} />}
         </span>
       </div>
       <p className="mt-2 text-sm font-medium">{finding.check}</p>

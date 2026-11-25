@@ -61,7 +61,7 @@ src/routes/       TanStack file routes – thin: params + head + render one scre
 src/screens/      signin/, citizen/ (+ challenge/), staff/{inbox,case,group,cameras,bulk,
                   refunds,audit}/, demo/
 src/components/   reusable UI: StatusBadge, StageTracker, ProgressSteps, AIPanel, SourceTag,
-                  DataRow, RuleCheckList, LevelBadge, LegalClockBar, AuditLog, Notice;
+                  DataRow, RuleCode (+ RuleText), RuleCheckList, LevelBadge, LegalClockBar, AuditLog, Notice;
                   assistant/ (citizen chat panel + launcher); layout/ holds SiteHeader,
                   BrandFooter, CitizenLayout/Nav, UserMenu, StaffLayout/Nav, DemoControls
 src/components/ui shadcn/ui primitives (generated, Lovable template)
@@ -69,7 +69,7 @@ src/types/        entities.ts (Fine, Camera, LegalAct, ChallengeCase, RefundCase
                   Consent, RuleCheck…) and status.ts (all status/union types)
 src/data/         mockData.ts (fixtures + DEMO_TODAY), mockEvidence.ts (documents with
                   AI-extracted fields), statusMessages.ts (citizen copy, tones),
-                  aiScripts.ts (every simulated AI text), ruleCatalogue.ts (R1–R12 titles/levels)
+                  aiScripts.ts (every simulated AI text), ruleCatalogue.ts (R1–R12 labels, one-sentence rules, levels)
 src/lib/          pure functions + *.test.ts:
                   transitions.ts  changeStatus + transition tables + audit entries
                   rules.ts        derived fine status, refund eligibility, rule checks R1–R12
@@ -287,6 +287,12 @@ Iteration 3.2
   allowed (e.g. fraud confirmed during verification). The refund queue and the case refund panel
   offer Approve, Request documents and Reject while verifying; every decision still needs a
   written reason (`changeStatus`). This supersedes the iteration 3.1 spec-conflict note.
+- **Rule codes:** every R1–R12 shown in the UI renders as `RuleCode`: the code, its
+  plain-language label (from `RULES` in `src/data/ruleCatalogue.ts`, the single place for labels
+  and one-sentence rules) and a tooltip with the rule on hover or keyboard focus. Free text that
+  mentions codes (audit reasons, oversight reasons, the auto-approved refund note) goes through
+  `RuleText`, which splits it with `splitRuleCodes`. The old short `title` field was replaced by
+  `label` + `rule`. The one-sentence rules are our plain-English wording, not legal text.
 
 Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
 

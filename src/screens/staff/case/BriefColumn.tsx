@@ -1,7 +1,7 @@
 import { AIPanel } from "@/components/AIPanel";
 import { AnalysisReport } from "@/components/analysis/AnalysisReport";
 import { IntakeProgress } from "@/components/analysis/IntakeProgress";
-import { RULES } from "@/data/ruleCatalogue";
+import { RuleCode } from "@/components/RuleCode";
 import { caseBriefFor } from "@/lib/brief";
 import { useAnalysis, useIntakeStep } from "@/store/selectors";
 import type { ChallengeCase } from "@/types";
@@ -30,10 +30,10 @@ export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
           {brief.suggestion}
         </p>
         <p className="mt-2 text-sm font-semibold text-foreground">Rules it relied on</p>
-        <ul className="mt-1 list-disc pl-5 text-sm">
+        <ul className="mt-1 space-y-1 text-sm">
           {brief.reliedOn.map((ruleId) => (
             <li key={ruleId}>
-              {ruleId} · {RULES[ruleId].title}
+              <RuleCode ruleId={ruleId} />
             </li>
           ))}
         </ul>
