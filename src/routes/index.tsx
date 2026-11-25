@@ -1,9 +1,85 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowRight, UserRound, BriefcaseBusiness, PanelsTopLeft, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { pageHead } from '@/components/prototype/shared';
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, UserRound, BriefcaseBusiness, PanelsTopLeft, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { pageHead } from "@/components/prototype/shared";
 
-export const Route = createFileRoute('/')({ component: Index, head: () => pageHead('Your photo-fines, made clear', 'Check, challenge and get your money back for photo-fines in Bogotá. Explore the Mi Fotomulta Clara academic prototype.') });
+export const Route = createFileRoute("/")({
+  component: Index,
+  head: () =>
+    pageHead(
+      "Your photo-fines, made clear",
+      "Check, challenge and get your money back for photo-fines in Bogotá. Explore the Mi Fotomulta Clara academic prototype.",
+    ),
+});
 function Index() {
- return <><main className="home-main"><div className="eyebrow">A clearer path forward</div><h1 className="home-title">Mi Fotomulta <span>Clara</span></h1><p className="home-subtitle">Check, challenge and get your money back for photo-fines, in one place</p><div className="role-grid"><section className="role-card citizen-role"><div className="role-icon"><UserRound size={25} strokeWidth={1.7}/></div><h2>For citizens</h2><p>Your fines, your options, your next step.<br/>Follow your case with clarity.</p><Button asChild className="role-button"><Link to="/citizen">I'm a citizen<ArrowRight size={18}/></Link></Button></section><section className="role-card staff-role"><div className="role-icon"><BriefcaseBusiness size={25} strokeWidth={1.7}/></div><h2>For SDM staff</h2><p>Review citizen challenges and evidence.<br/>Keep each case moving forward.</p><Button variant="outline" asChild className="role-button"><Link to="/staff">I'm SDM staff<ArrowRight size={18}/></Link></Button></section></div><div className="home-demo"><Button variant="link" asChild><Link to="/demo"><PanelsTopLeft size={17}/>Open split-screen demo<ArrowRight size={16}/></Link></Button></div><div className="home-note"><ShieldCheck size={20}/><p>A safe space to explore. All people, fines and case records are fictional.<br/>No real payments, submissions or personal information are collected.</p></div></main><footer className="site-footer"><span>Designed for clarity. Built for Bogotá.</span><span>Mi Fotomulta Clara · Academic prototype</span></footer></>;
+  return (
+    <>
+      <main className="home-main">
+        <div className="eyebrow">A clearer path forward</div>
+        <h1 className="home-title">
+          Mi Fotomulta <span>Clara</span>
+        </h1>
+        <p className="home-subtitle">
+          Check, challenge and get your money back for photo-fines, in one place
+        </p>
+        <div className="role-grid">
+          <section className="role-card citizen-role">
+            <div className="role-icon">
+              <UserRound size={25} strokeWidth={1.7} />
+            </div>
+            <h2>For citizens</h2>
+            <p>
+              Your fines, your options, your next step.
+              <br />
+              Follow your case with clarity.
+            </p>
+            <Button asChild className="role-button">
+              <Link to="/citizen">
+                I'm a citizen
+                <ArrowRight size={18} />
+              </Link>
+            </Button>
+          </section>
+          <section className="role-card staff-role">
+            <div className="role-icon">
+              <BriefcaseBusiness size={25} strokeWidth={1.7} />
+            </div>
+            <h2>For SDM staff</h2>
+            <p>
+              Review citizen challenges and evidence.
+              <br />
+              Keep each case moving forward.
+            </p>
+            <Button variant="outline" asChild className="role-button">
+              <Link to="/staff">
+                I'm SDM staff
+                <ArrowRight size={18} />
+              </Link>
+            </Button>
+          </section>
+        </div>
+        <div className="home-demo">
+          <Button variant="link" asChild>
+            <Link to="/demo">
+              <PanelsTopLeft size={17} />
+              Open split-screen demo
+              <ArrowRight size={16} />
+            </Link>
+          </Button>
+        </div>
+        <div className="home-note">
+          <ShieldCheck size={20} />
+          <p>
+            A safe space to explore. All people, fines and case records are fictional.
+            <br />
+            No real payments, submissions or personal information are collected.
+          </p>
+        </div>
+      </main>
+      <footer className="site-footer">
+        <span>Designed for clarity. Built for Bogotá.</span>
+        <span>Mi Fotomulta Clara · Academic prototype</span>
+      </footer>
+    </>
+  );
 }

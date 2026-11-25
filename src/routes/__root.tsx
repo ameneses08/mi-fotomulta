@@ -83,16 +83,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Mi Fotomulta Clara" },
-      { name: "description", content: "An academic prototype for checking and challenging Bogotá photo-fines." },
+      {
+        name: "description",
+        content: "An academic prototype for checking and challenging Bogotá photo-fines.",
+      },
       { property: "og:title", content: "Mi Fotomulta Clara" },
-      { property: "og:description", content: "An academic prototype for checking and challenging Bogotá photo-fines." },
+      {
+        property: "og:description",
+        content: "An academic prototype for checking and challenging Bogotá photo-fines.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
