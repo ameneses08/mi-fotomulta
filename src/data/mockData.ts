@@ -1,0 +1,19 @@
+export type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+export type Fine = { id: string; reference: string; plate: string; date: string; location: string; amount: number; paid: boolean; authorised: boolean; external: boolean; status: string; tone: Tone; offence: string; authority: string };
+export const citizen = { name: 'Marta Rodríguez Peña', firstName: 'Marta', document: '1.020.345.678', plate: 'JKM482' };
+export const fines: Fine[] = [
+ { id: 'F-2041', reference: '1100100000002041', plate: 'JKM482', date: '12 Nov 2026', location: 'Av. Boyacá con Calle 80', amount: 650000, paid: false, authorised: true, external: false, status: 'Pending payment', tone: 'warning', offence: 'Exceeding the posted speed limit', authority: 'Secretaría Distrital de Movilidad de Bogotá' },
+ { id: 'F-2042', reference: '1100100000002042', plate: 'JKM482', date: '08 Nov 2026', location: 'Av. NQS con Calle 13', amount: 650000, paid: false, authorised: false, external: false, status: 'Under review', tone: 'info', offence: 'Exceeding the posted speed limit', authority: 'Secretaría Distrital de Movilidad de Bogotá' },
+ { id: 'F-2043', reference: '1100100000002043', plate: 'JKM482', date: '02 Nov 2026', location: 'Av. Ciudad de Cali con Calle 26', amount: 390000, paid: false, authorised: true, external: false, status: 'Pending payment', tone: 'warning', offence: 'Driving through a red light', authority: 'Secretaría Distrital de Movilidad de Bogotá' },
+ { id: 'F-2044', reference: '1100100000002044', plate: 'JKM482', date: '21 Oct 2026', location: 'Autopista Norte con Calle 170', amount: 650000, paid: true, authorised: false, external: false, status: 'Refund on hold', tone: 'warning', offence: 'Exceeding the posted speed limit', authority: 'Secretaría Distrital de Movilidad de Bogotá' },
+ { id: 'F-2045', reference: '1100100000002045', plate: 'JKM482', date: '14 Oct 2026', location: 'Av. Caracas con Calle 63', amount: 390000, paid: true, authorised: true, external: false, status: 'Paid', tone: 'success', offence: 'Driving through a red light', authority: 'Secretaría Distrital de Movilidad de Bogotá' },
+ { id: 'F-2046', reference: '2575400000002046', plate: 'JKM482', date: '06 Oct 2026', location: 'Autopista Sur, sector San Mateo', amount: 650000, paid: false, authorised: true, external: true, status: 'Another authority', tone: 'neutral', offence: 'Exceeding the posted speed limit', authority: 'Secretaría de Movilidad de Soacha' },
+];
+export const reasons = ["I wasn't driving", 'Camera not authorised', 'Wrong plate', 'Notification arrived late', 'Other'];
+export const factQuestions = ['What happened?', 'Who was driving, and how do you know?', 'What would you like the inspector to consider?'];
+export const caseStages = ['Submitted', 'Being checked', 'Hearing', 'Decision', 'Closed'];
+export const refundStages = ['On hold', 'Eligible', 'Verifying payment details', 'Approved', 'Paid'];
+export type CaseRecord = { id: string; fineId: string; citizen: string; reason: string; stage: number; holder: string; expected: string; statusMessage: string; history: { title: string; date: string; detail: string }[] };
+export const initialCases: CaseRecord[] = [{ id: 'C-1042', fineId: 'F-2041', citizen: citizen.name, reason: "I wasn't driving", stage: 1, holder: 'Automatic checks', expected: '04 Dec 2026', statusMessage: 'We are checking your information', history: [ { title: 'Automatic checks started', date: '25 Nov 2026 · 10:31', detail: 'Your request is being matched with the fine records.' }, { title: 'Challenge submitted', date: '25 Nov 2026 · 10:30', detail: 'Your request and supporting documents were received.' } ] }];
+export const legalActs = [{ id: 'LA-2026-018', title: 'Decision on a photo-fine challenge', type: 'Draft decision', caseId: 'C-1042', date: '25 Nov 2026', status: 'Awaiting inspector review' }];
+export const formatCOP = (amount: number) => `COP ${new Intl.NumberFormat('en-US').format(amount)}`;

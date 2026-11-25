@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CitizenRouteImport } from './routes/citizen'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as StaffLegalActsRouteImport } from './routes/staff_.legal-acts'
+import { Route as CitizenCasesIdRouteImport } from './routes/citizen_.cases.$id'
+import { Route as CitizenFinesIdRouteImport } from './routes/citizen_.fines.$id'
+import { Route as CitizenRefundsIdRouteImport } from './routes/citizen_.refunds.$id'
+import { Route as CitizenFinesIdChallengeRouteImport } from './routes/citizen_.fines.$id_.challenge'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CitizenRoute = CitizenRouteImport.update({
+  id: '/citizen',
+  path: '/citizen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffLegalActsRoute = StaffLegalActsRouteImport.update({
+  id: '/staff_/legal-acts',
+  path: '/staff/legal-acts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitizenCasesIdRoute = CitizenCasesIdRouteImport.update({
+  id: '/citizen_/cases/$id',
+  path: '/citizen/cases/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitizenFinesIdRoute = CitizenFinesIdRouteImport.update({
+  id: '/citizen_/fines/$id',
+  path: '/citizen/fines/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitizenRefundsIdRoute = CitizenRefundsIdRouteImport.update({
+  id: '/citizen_/refunds/$id',
+  path: '/citizen/refunds/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitizenFinesIdChallengeRoute = CitizenFinesIdChallengeRouteImport.update({
+  id: '/citizen_/fines/$id_/challenge',
+  path: '/citizen/fines/$id/challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/citizen': typeof CitizenRoute
+  '/demo': typeof DemoRoute
+  '/staff': typeof StaffRoute
+  '/staff/legal-acts': typeof StaffLegalActsRoute
+  '/citizen/cases/$id': typeof CitizenCasesIdRoute
+  '/citizen/fines/$id': typeof CitizenFinesIdRoute
+  '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
+  '/citizen/fines/$id/challenge': typeof CitizenFinesIdChallengeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/citizen': typeof CitizenRoute
+  '/demo': typeof DemoRoute
+  '/staff': typeof StaffRoute
+  '/staff/legal-acts': typeof StaffLegalActsRoute
+  '/citizen/cases/$id': typeof CitizenCasesIdRoute
+  '/citizen/fines/$id': typeof CitizenFinesIdRoute
+  '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
+  '/citizen/fines/$id/challenge': typeof CitizenFinesIdChallengeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/citizen': typeof CitizenRoute
+  '/demo': typeof DemoRoute
+  '/staff': typeof StaffRoute
+  '/staff_/legal-acts': typeof StaffLegalActsRoute
+  '/citizen_/cases/$id': typeof CitizenCasesIdRoute
+  '/citizen_/fines/$id': typeof CitizenFinesIdRoute
+  '/citizen_/refunds/$id': typeof CitizenRefundsIdRoute
+  '/citizen_/fines/$id_/challenge': typeof CitizenFinesIdChallengeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/citizen'
+    | '/demo'
+    | '/staff'
+    | '/staff/legal-acts'
+    | '/citizen/cases/$id'
+    | '/citizen/fines/$id'
+    | '/citizen/refunds/$id'
+    | '/citizen/fines/$id/challenge'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/citizen'
+    | '/demo'
+    | '/staff'
+    | '/staff/legal-acts'
+    | '/citizen/cases/$id'
+    | '/citizen/fines/$id'
+    | '/citizen/refunds/$id'
+    | '/citizen/fines/$id/challenge'
+  id:
+    | '__root__'
+    | '/'
+    | '/citizen'
+    | '/demo'
+    | '/staff'
+    | '/staff_/legal-acts'
+    | '/citizen_/cases/$id'
+    | '/citizen_/fines/$id'
+    | '/citizen_/refunds/$id'
+    | '/citizen_/fines/$id_/challenge'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CitizenRoute: typeof CitizenRoute
+  DemoRoute: typeof DemoRoute
+  StaffRoute: typeof StaffRoute
+  StaffLegalActsRoute: typeof StaffLegalActsRoute
+  CitizenCasesIdRoute: typeof CitizenCasesIdRoute
+  CitizenFinesIdRoute: typeof CitizenFinesIdRoute
+  CitizenRefundsIdRoute: typeof CitizenRefundsIdRoute
+  CitizenFinesIdChallengeRoute: typeof CitizenFinesIdChallengeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +156,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/citizen': {
+      id: '/citizen'
+      path: '/citizen'
+      fullPath: '/citizen'
+      preLoaderRoute: typeof CitizenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff_/legal-acts': {
+      id: '/staff_/legal-acts'
+      path: '/staff/legal-acts'
+      fullPath: '/staff/legal-acts'
+      preLoaderRoute: typeof StaffLegalActsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/citizen_/cases/$id': {
+      id: '/citizen_/cases/$id'
+      path: '/citizen/cases/$id'
+      fullPath: '/citizen/cases/$id'
+      preLoaderRoute: typeof CitizenCasesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/citizen_/fines/$id': {
+      id: '/citizen_/fines/$id'
+      path: '/citizen/fines/$id'
+      fullPath: '/citizen/fines/$id'
+      preLoaderRoute: typeof CitizenFinesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/citizen_/refunds/$id': {
+      id: '/citizen_/refunds/$id'
+      path: '/citizen/refunds/$id'
+      fullPath: '/citizen/refunds/$id'
+      preLoaderRoute: typeof CitizenRefundsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/citizen_/fines/$id_/challenge': {
+      id: '/citizen_/fines/$id_/challenge'
+      path: '/citizen/fines/$id/challenge'
+      fullPath: '/citizen/fines/$id/challenge'
+      preLoaderRoute: typeof CitizenFinesIdChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CitizenRoute: CitizenRoute,
+  DemoRoute: DemoRoute,
+  StaffRoute: StaffRoute,
+  StaffLegalActsRoute: StaffLegalActsRoute,
+  CitizenCasesIdRoute: CitizenCasesIdRoute,
+  CitizenFinesIdRoute: CitizenFinesIdRoute,
+  CitizenRefundsIdRoute: CitizenRefundsIdRoute,
+  CitizenFinesIdChallengeRoute: CitizenFinesIdChallengeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

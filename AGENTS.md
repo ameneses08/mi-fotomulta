@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Prototype architecture
+- Keep entities in `src/data/mockData.ts` and every simulated AI response in `src/data/aiScripts.ts` so a future developer can replace the data sources independently.
+- Keep all mutable application state and business actions in `src/store/appStore.ts` using Zustand; components select state and invoke actions rather than implementing domain logic.
+- Use reusable presentation components in `src/components/` and thin TanStack content routes, with unnested detail subpages so each journey renders independently.
+- This shell uses in-memory mock data only, with no authentication, backend, browser persistence, or live AI calls; it must not imply official transactions.
