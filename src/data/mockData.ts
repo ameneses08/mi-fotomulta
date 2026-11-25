@@ -615,3 +615,6 @@ export const MOCK_SIGN_IN = {
 
 /** Fictional SDM inspectors a case can be assigned to. */
 export const INSPECTORS = [INSPECTOR_NAME, "Andrés Ruiz", "Camila Torres"];
+
+/** Everyone who acts as SDM staff in the audit log (inspectors and signing officials). */
+export const STAFF_NAMES = [...INSPECTORS, "Álvaro Medina"];
