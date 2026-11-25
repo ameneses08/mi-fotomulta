@@ -45,6 +45,9 @@ export const FACT_QUESTIONS = [
   "What would you like the inspector to consider?",
 ];
 
+/** Files added by "Use sample documents" in the challenge wizard, so no file picker is needed. */
+export const SAMPLE_EVIDENCE_FILES = ["cedula-marta-rodriguez.pdf", "signed-statement-driver.pdf"];
+
 export const citizen: Citizen = {
   name: "Marta Rodríguez Peña",
   firstName: "Marta",

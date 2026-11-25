@@ -1,7 +1,8 @@
-import { FileText, Trash2, Upload } from "lucide-react";
+import { FilePlus2, FileText, Trash2, Upload } from "lucide-react";
 import { AIPanel } from "@/components/AIPanel";
 import { Button } from "@/components/ui/button";
 import { aiScripts } from "@/data/aiScripts";
+import { SAMPLE_EVIDENCE_FILES } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
 
 export function EvidenceStep() {
@@ -27,6 +28,14 @@ export function EvidenceStep() {
           onChange={(e) => addEvidence(Array.from(e.target.files ?? []).map((f) => f.name))}
         />
       </label>
+      <Button
+        variant="outline"
+        className="mt-3 w-full"
+        onClick={() => addEvidence(SAMPLE_EVIDENCE_FILES)}
+      >
+        <FilePlus2 size={18} aria-hidden="true" />
+        Use sample documents
+      </Button>
       <ul>
         {evidence.map((item) => (
           <li key={item.name} className="file-row">
