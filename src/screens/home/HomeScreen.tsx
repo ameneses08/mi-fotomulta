@@ -58,10 +58,6 @@ export function HomeScreen() {
           </p>
         </div>
       </main>
-      <footer className="site-footer">
-        <span>Designed for clarity. Built for Bogotá.</span>
-        <span>Mi Fotomulta Clara · Academic prototype</span>
-      </footer>
     </>
   );
 }
