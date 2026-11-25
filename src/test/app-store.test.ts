@@ -167,6 +167,29 @@ describe("refund bank details", () => {
   });
 });
 
+describe("citizen assistant", () => {
+  it("shows a typing indicator, then answers from live state", () => {
+    store().askAssistant("Why is F-2042 under review?");
+    expect(store().assistantTyping).toBe(true);
+    vi.advanceTimersByTime(SIMULATION_DELAYS.assistantTyping);
+    expect(store().assistantTyping).toBe(false);
+    expect(store().assistantMessages.at(-1)?.text).toContain("CAM-NQS13");
+  });
+
+  it("changes its answer after the bulk act is registered", () => {
+    store().registerLegalAct(BULK_ACT_ID, "Laura Gómez");
+    store().askAssistant("Why is F-2042 under review?");
+    vi.advanceTimersByTime(SIMULATION_DELAYS.assistantTyping);
+    expect(store().assistantMessages.at(-1)?.text).toContain("revoked");
+  });
+
+  it("falls back to the suggested questions for anything else", () => {
+    store().askAssistant("Tell me a joke");
+    vi.advanceTimersByTime(SIMULATION_DELAYS.assistantTyping);
+    expect(store().assistantMessages.at(-1)).toMatchObject({ showChips: true });
+  });
+});
+
 describe("reset", () => {
   it("can start before Marta's challenge so the citizen journey begins fresh", () => {
     store().resetDemo("beforeChallenge");

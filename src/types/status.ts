@@ -51,3 +51,6 @@ export type DecisionKind =
   "Revoke" | "Uphold" | "Partly uphold" | "Schedule hearing" | "Request correction";
 
 export type RefundDecisionKind = "Approve" | "Request correction" | "Reject";
+
+export type AssistantIntent =
+  "statusCheck" | "challengeDeadline" | "whyUnderReview" | "refundTiming";

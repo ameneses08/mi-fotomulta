@@ -1,4 +1,11 @@
-import type { ChallengeReason, DecisionKind, RuleId } from "@/types";
+import type {
+  AssistantIntent,
+  ChallengeReason,
+  DecisionKind,
+  FineStatus,
+  RefundStatus,
+  RuleId,
+} from "@/types";
 
 /**
  * Every simulated AI text in the prototype. Nothing here comes from a live model.
@@ -7,6 +14,7 @@ import type { ChallengeReason, DecisionKind, RuleId } from "@/types";
 
 export const AI_LABELS = {
   citizen: "AI assistant – information, not legal advice",
+  assistant: "AI assistant – simulated · information, not legal advice",
   staff: "AI suggestion – an inspector decides",
   simulated: "Simulated response",
 } as const;
@@ -120,4 +128,68 @@ export const aiScripts = {
       "The camera was not authorised, but no legal act is in force. The refund stays on hold until the act is registered.",
   },
   groupingNote: "Grouping is for overview only. Each case is decided individually.",
+} as const;
+
+/** Citizen assistant templates. Filled from live state by lib/assistant.ts. */
+export const assistantScripts = {
+  greeting: "Hi {first_name}, I can check your photo-fines, deadlines and refunds.",
+  chips: [
+    { intent: "statusCheck", question: "Give me a status check of my fotomultas" },
+    { intent: "challengeDeadline", question: "How long do I have to challenge F-2041?" },
+    { intent: "whyUnderReview", question: "Why is F-2042 under review?" },
+    { intent: "refundTiming", question: "When will I get my refund?" },
+  ] satisfies { intent: AssistantIntent; question: string }[],
+  fallback: "In this prototype I can help with these questions:",
+  humanExit:
+    "Prefer to talk to a person? Call Línea 195 or visit a Centro de Servicios de Movilidad.",
+  status: {
+    intro: "You have {total} fines: {parts}.",
+    parts: {
+      "Pending payment": "{n} to pay",
+      "Challenge in progress": "{n} with a challenge in progress ({detail})",
+      "Under review": "{n} under review because the camera wasn't authorised",
+      "Refund on hold": "{n} refund on hold",
+      Paid: "{n} paid",
+      Revoked: "{n} revoked",
+      "Another authority": "{n} from another authority",
+    } satisfies Record<FineStatus, string>,
+    challengeDetail: "{holder}, expected by {date}",
+    challengeDetailNoDate: "{holder}",
+  },
+  deadline: {
+    open: "You have until {deadline} to challenge {fine_id}: {days_left} working days left. The 11 working days count from the notification on {notified}.",
+    alreadyChallenged:
+      "You already challenged {fine_id} on {submitted} (case {case_id}). Its status now: {status}.",
+    passed:
+      "The 11-working-day window for {fine_id} ended on {deadline}. You can still file: a late challenge is routed to an inspector, not refused automatically.",
+    unavailable: "{fine_id} can't be challenged here because its status is: {status}.",
+  },
+  why: {
+    underReview:
+      "{fine_id} is under review because camera {camera} was not authorised by the ANSV on {date}. What happens to fines from that camera depends on a decision by the competent authority. You don't need to do anything now.",
+    revoked:
+      "{fine_id} is no longer under review: it has been revoked{by_act}. You don't need to pay it.",
+    other: "{fine_id} is not under review. Its status is: {status}.",
+  },
+  refund: {
+    "On hold":
+      "Your refund of {amount} for {fine_id} is on hold. It depends on a decision by the competent authority about camera {camera}; I'll show the change here as soon as it happens.",
+    Eligible:
+      "Good news: your refund of {amount} for {fine_id} is ready. Confirm a bank account in your name to receive it.",
+    "Verifying payment details":
+      "We're checking that the bank account is in your name. It usually takes a moment.",
+    "Needs correction": "We couldn't verify your account. Add an account in your name to continue.",
+    Approved: "Your refund of {amount} is approved. Expected payment by {date}.",
+    Paid: "We paid {amount} on {date}.",
+    Rejected: "Your refund was not approved. You can appeal; the refund page explains how.",
+    Appealed: "We received your appeal and will tell you the decision here.",
+  } satisfies Record<RefundStatus, string>,
+  noRefund: "You don't have a refund in progress.",
+  actions: {
+    fine: "View {id}",
+    case: "Track my challenge",
+    challenge: "Challenge {id}",
+    refund: "View my refund",
+    fines: "View my fines",
+  },
 } as const;

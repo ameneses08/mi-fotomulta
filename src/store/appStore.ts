@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { aiScripts } from "@/data/aiScripts";
+import { aiScripts, assistantScripts } from "@/data/aiScripts";
 import {
   BULK_ACT_ID,
   cameras,
@@ -27,6 +27,7 @@ import {
   validateStep,
   type ChallengeDraft,
 } from "@/lib/challenge";
+import { answerQuestion, matchIntent, type AssistantAction } from "@/lib/assistant";
 import { applyDecision } from "@/lib/decision";
 import {
   autoVerifyRefund,
@@ -52,7 +53,7 @@ import type {
 import { cancelScheduled, demoTimestamp, schedule } from "./demoClock";
 
 /** Delays for simulated background work, in milliseconds. */
-export const SIMULATION_DELAYS = { checksDone: 3000, refundCheck: 2500 };
+export const SIMULATION_DELAYS = { checksDone: 3000, refundCheck: 2500, assistantTyping: 800 };
 
 interface DemoData {
   citizen: Citizen;
@@ -69,6 +70,18 @@ interface DemoData {
   bankSaved: boolean;
   /** State before the bulk act was registered, so the demo can revert it. */
   actSnapshot: { legalActs: LegalAct[]; refunds: RefundCase[] } | null;
+  assistantMessages: AssistantMessage[];
+  assistantTyping: boolean;
+}
+
+export interface AssistantMessage {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+  action?: AssistantAction;
+  humanExit?: boolean;
+  /** Show the suggested-question chips under this message. */
+  showChips?: boolean;
 }
 
 export interface DecisionRequest {
@@ -100,6 +113,7 @@ interface Actions {
   resetDemo: (preset?: DemoPreset) => void;
   /** Restarts simulated background steps that a page reload interrupted. */
   resumeSimulations: () => void;
+  askAssistant: (question: string) => void;
 }
 
 export type AppState = DemoData & Actions;
@@ -126,6 +140,8 @@ function initialData(preset: DemoPreset = "submitted"): DemoData {
     bankError: "",
     bankSaved: false,
     actSnapshot: null,
+    assistantMessages: [],
+    assistantTyping: false,
   };
 }
 
@@ -157,6 +173,8 @@ function persistedData(state: AppState): DemoData {
     bankError: "",
     bankSaved: state.bankSaved,
     actSnapshot: state.actSnapshot,
+    assistantMessages: state.assistantMessages,
+    assistantTyping: false,
   };
 }
 
@@ -351,6 +369,39 @@ export const useAppStore = create<AppState>()(
         resetDemo: (preset) => {
           cancelScheduled();
           set(initialData(preset));
+        },
+        askAssistant: (question) => {
+          const text = question.trim();
+          if (!text || get().assistantTyping) return;
+          const nextId = () => get().assistantMessages.length + 1;
+          set((s) => ({
+            assistantMessages: [...s.assistantMessages, { id: nextId(), role: "user", text }],
+            assistantTyping: true,
+          }));
+          schedule(() => {
+            const state = get();
+            const intent = matchIntent(text);
+            const reply: AssistantMessage = intent
+              ? {
+                  id: nextId(),
+                  role: "assistant",
+                  ...answerQuestion(intent, text, {
+                    rules: rulesContextOf(state),
+                    citizen: state.citizen,
+                    today: DEMO_TODAY,
+                  }),
+                }
+              : {
+                  id: nextId(),
+                  role: "assistant",
+                  text: assistantScripts.fallback,
+                  showChips: true,
+                };
+            set((s) => ({
+              assistantMessages: [...s.assistantMessages, reply],
+              assistantTyping: false,
+            }));
+          }, SIMULATION_DELAYS.assistantTyping);
         },
         resumeSimulations: () => {
           const { challenges: all, refunds: allRefunds, citizen: owner } = get();

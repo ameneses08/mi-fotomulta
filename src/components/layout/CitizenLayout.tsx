@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, CircleHelp, Phone } from "lucide-react";
+import { ArrowLeft, CircleHelp } from "lucide-react";
 import type { ReactNode } from "react";
+import { AssistantLauncher } from "@/components/assistant/AssistantLauncher";
+import { AssistantPanel } from "@/components/assistant/AssistantPanel";
 import { CitizenNav } from "./CitizenNav";
 
 export function HelpFooter() {
@@ -9,21 +11,6 @@ export function HelpFooter() {
       <CircleHelp size={18} aria-hidden="true" />
       <p>Need help? Visit a Centro de Servicios de Movilidad or call Línea 195.</p>
     </footer>
-  );
-}
-
-/** Right-hand column on wide containers. */
-export function CitizenAside() {
-  return (
-    <section className="panel" aria-labelledby="aside-help">
-      <h2 id="aside-help" className="flex items-center gap-2 font-semibold">
-        <Phone size={17} aria-hidden="true" />
-        Talk to a person
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Call Línea 195 or visit a Centro de Servicios de Movilidad.
-      </p>
-    </section>
   );
 }
 
@@ -52,8 +39,11 @@ export function CitizenLayout({ children, back }: CitizenLayoutProps) {
           <HelpFooter />
         </main>
         <aside className="citizen-aside hidden @4xl:block">
-          <CitizenAside />
+          <AssistantPanel />
         </aside>
+      </div>
+      <div className="@4xl:hidden">
+        <AssistantLauncher />
       </div>
     </div>
   );

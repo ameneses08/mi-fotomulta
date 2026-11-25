@@ -23,7 +23,9 @@ export function ChallengeScreen({ id }: { id: string }) {
   const error = useAppStore((s) => s.draftError);
   const { startChallenge, nextStep, previousStep, submitChallenge } = useAppStore.getState();
 
-  useEffect(() => startChallenge(id), [id, startChallenge]);
+  useEffect(() => {
+    startChallenge(id);
+  }, [id, startChallenge]);
 
   if (!fine) return <NotFoundScreen label="Fine" />;
   if (fine.paidOn || status === "Another authority" || status === "Revoked") {
