@@ -1,5 +1,6 @@
+import type { AnalysisContext } from "@/lib/analysis";
 import type { RulesContext } from "@/lib/rules";
-import type { Camera, ChallengeCase, Fine, LegalAct, RefundCase } from "@/types";
+import type { Camera, ChallengeCase, EvidenceItem, Fine, LegalAct, RefundCase } from "@/types";
 
 export const authorisedCamera: Camera = {
   id: "CAM-OK",
@@ -85,4 +86,39 @@ export function makeContext(overrides: Partial<RulesContext> = {}): RulesContext
     refunds: [],
     ...overrides,
   };
+}
+
+export function makeAnalysisContext(overrides: Partial<AnalysisContext> = {}): AnalysisContext {
+  return { ...makeContext(), reviews: {}, today: "2026-11-25", ...overrides };
+}
+
+/** The documents of a well-formed "I wasn't driving" filing. */
+export function driverDocuments(
+  overrides: { driverOnLicence?: string; licenceUntil?: string } = {},
+): EvidenceItem[] {
+  return [
+    {
+      name: "id.pdf",
+      kind: "ID copy",
+      extracted: [{ name: "Full name", value: "Test Owner", page: 1 }],
+    },
+    {
+      name: "statement.pdf",
+      kind: "Driver statement",
+      extracted: [
+        { name: "Driver", value: "Test Driver", page: 1 },
+        { name: "Signature", value: "Present", page: 1 },
+        { name: "Date signed", value: "2026-11-05", page: 1 },
+      ],
+    },
+    {
+      name: "licence.pdf",
+      kind: "Driving licence",
+      extracted: [
+        { name: "Full name", value: overrides.driverOnLicence ?? "Test Driver", page: 1 },
+        { name: "Licence number", value: "L-1", page: 1 },
+        { name: "Valid until", value: overrides.licenceUntil ?? "2030-01-01", page: 1 },
+      ],
+    },
+  ];
 }
