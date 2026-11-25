@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { DEMO_TODAY } from "@/data/mockData";
 import { analyseCase, analyseRefund, type AnalysisContext } from "@/lib/analysis";
+import { INTAKE_STEPS } from "@/lib/intake";
 import { deriveFineStatus, type RulesContext } from "@/lib/rules";
 import type { AuditEntry, CaseAnalysis, FineStatus } from "@/types";
 import { useAppStore } from "./appStore";
@@ -62,4 +63,12 @@ export function useCaseAudit(caseId: string): AuditEntry[] {
         .sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
     [audit, caseId],
   );
+}
+
+/** Steps completed by a running intake analysis, or undefined once it is complete. */
+export function useIntakeStep(caseId: string): number | undefined {
+  return useAppStore((s) => {
+    const done = s.intakeProgress[caseId];
+    return done !== undefined && done < INTAKE_STEPS.length ? done : undefined;
+  });
 }

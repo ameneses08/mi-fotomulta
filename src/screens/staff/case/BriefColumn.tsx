@@ -1,20 +1,26 @@
 import { AIPanel } from "@/components/AIPanel";
 import { AnalysisReport } from "@/components/analysis/AnalysisReport";
+import { IntakeProgress } from "@/components/analysis/IntakeProgress";
 import { RULES } from "@/data/ruleCatalogue";
 import { caseBriefFor } from "@/lib/brief";
-import { useAnalysis } from "@/store/selectors";
+import { useAnalysis, useIntakeStep } from "@/store/selectors";
 import type { ChallengeCase } from "@/types";
 
 export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
   const brief = caseBriefFor(challenge);
   const analysis = useAnalysis(challenge.id);
+  const intakeStep = useIntakeStep(challenge.id);
 
   return (
     <section className="staff-column" aria-labelledby="brief-title">
       <h2 id="brief-title" className="column-title">
         AI analysis
       </h2>
-      <AnalysisReport analysis={analysis} />
+      {intakeStep === undefined ? (
+        <AnalysisReport analysis={analysis} />
+      ) : (
+        <IntakeProgress completed={intakeStep} />
+      )}
       <p className="mt-2 text-xs text-muted-foreground">
         The summary never replaces the original filing. Read both.
       </p>

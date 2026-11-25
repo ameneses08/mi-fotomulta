@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Layers } from "lucide-react";
+import { ArrowRight, Layers, Loader2 } from "lucide-react";
 import { LegalClockBar } from "@/components/LegalClockBar";
 import { StatusBadge } from "@/components/StatusBadge";
 import { CHALLENGE_STATUS_TONES } from "@/data/statusMessages";
+import { INTAKE_STEPS } from "@/lib/intake";
 import type { CaseGroup, ChallengeRow, Priority } from "@/lib/queue";
+import { useIntakeStep } from "@/store/selectors";
 import type { Tone } from "@/types";
 import { AssignSelect } from "./AssignSelect";
 import { FlagList } from "./FlagList";
@@ -16,6 +18,7 @@ const PRIORITY_TONES: Record<Priority, Tone> = {
 
 export function InboxRow({ row, group }: { row: ChallengeRow; group: CaseGroup | undefined }) {
   const { challenge, clock, flags, open, priority } = row;
+  const intakeStep = useIntakeStep(challenge.id);
   return (
     <tr>
       <td>
@@ -48,7 +51,14 @@ export function InboxRow({ row, group }: { row: ChallengeRow; group: CaseGroup |
         )}
       </td>
       <td>
-        <FlagList flags={flags} />
+        {intakeStep === undefined ? (
+          <FlagList flags={flags} />
+        ) : (
+          <span className="analysing" role="status">
+            <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+            AI analysing {intakeStep}/{INTAKE_STEPS.length}
+          </span>
+        )}
       </td>
       <td>
         {open ? (

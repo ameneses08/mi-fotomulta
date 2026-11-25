@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BULK_ACT_ID, HERO_CASE_ID, HERO_FINE_ID, HERO_REFUND_ID } from "@/data/mockData";
 import { deriveFineStatus, deriveRefundEligibility } from "@/lib/rules";
-import { rulesContextOf, SIMULATION_DELAYS, useAppStore } from "@/store/appStore";
+import { INTAKE_TOTAL_MS, rulesContextOf, SIMULATION_DELAYS, useAppStore } from "@/store/appStore";
 
 const store = () => useAppStore.getState();
 const fineStatus = (id: string) => {
@@ -84,7 +84,11 @@ describe("hero flow", () => {
     fillDraftToReview();
     expect(store().submitChallenge()).toBe(HERO_CASE_ID);
     expect(hero()).toMatchObject({ status: "Received", holder: "Automatic checks" });
-    vi.advanceTimersByTime(SIMULATION_DELAYS.checksDone);
+    vi.advanceTimersByTime(SIMULATION_DELAYS.intakeStep * 3);
+    expect(store().intakeProgress[HERO_CASE_ID]).toBe(3);
+    expect(hero()?.status).toBe("Received");
+    vi.advanceTimersByTime(INTAKE_TOTAL_MS);
+    expect(store().intakeProgress[HERO_CASE_ID]).toBe(6);
     expect(hero()).toMatchObject({ status: "Validating", holder: "Inspector Laura Gómez" });
   });
 
@@ -191,6 +195,21 @@ describe("citizen assistant", () => {
   });
 });
 
+describe("replaying Marta's submission (demo)", () => {
+  it("re-submits C-1042 with sample documents and runs the intake again", () => {
+    expect(store().replayHeroSubmission()).toBe(HERO_CASE_ID);
+    expect(hero()?.status).toBe("Received");
+    expect(hero()?.evidence.map((e) => e.kind)).toEqual([
+      "ID copy",
+      "Driver statement",
+      "Driving licence",
+    ]);
+    expect(store().intakeProgress[HERO_CASE_ID]).toBe(0);
+    vi.advanceTimersByTime(INTAKE_TOTAL_MS);
+    expect(hero()?.status).toBe("Validating");
+  });
+});
+
 describe("one challenge per fine (R3)", () => {
   it("refuses a second challenge while one exists", () => {
     fillDraftToReview();
@@ -250,7 +269,7 @@ describe("reset", () => {
     fillDraftToReview();
     store().submitChallenge();
     store().resetDemo();
-    vi.advanceTimersByTime(SIMULATION_DELAYS.checksDone);
+    vi.advanceTimersByTime(INTAKE_TOTAL_MS);
     expect(hero()?.status).toBe("Validating");
     expect(
       store().audit.some(

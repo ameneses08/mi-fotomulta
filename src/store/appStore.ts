@@ -16,6 +16,7 @@ import {
   INSPECTOR_NAME,
   legalActs,
   refunds,
+  SAMPLE_EVIDENCE,
 } from "@/data/mockData";
 import {
   caseIdForFine,
@@ -40,6 +41,7 @@ import {
   type BankForm,
   type BankFormErrors,
 } from "@/lib/refund";
+import { INTAKE_STEPS, isIntakeComplete } from "@/lib/intake";
 import { registerAct } from "@/lib/revocation";
 import { createAuditEntry } from "@/lib/transitions";
 import { analyseCase, analyseRefund, type AnalysisContext } from "@/lib/analysis";
@@ -63,7 +65,10 @@ import type {
 import { cancelScheduled, demoTimestamp, schedule } from "./demoClock";
 
 /** Delays for simulated background work, in milliseconds. */
-export const SIMULATION_DELAYS = { checksDone: 3000, refundCheck: 2500, assistantTyping: 800 };
+export const SIMULATION_DELAYS = { intakeStep: 680, refundCheck: 2500, assistantTyping: 800 };
+
+/** The whole intake analysis (~4 s): one delay per step. */
+export const INTAKE_TOTAL_MS = SIMULATION_DELAYS.intakeStep * INTAKE_STEPS.length;
 
 interface DemoData {
   citizen: Citizen;
@@ -86,6 +91,8 @@ interface DemoData {
   findingReviews: Record<string, FindingReview>;
   /** Extracted document fields an inspector has checked against the original. */
   verifiedFields: Record<string, boolean>;
+  /** Steps completed by the intake analysis of a newly submitted case (see lib/intake). */
+  intakeProgress: Record<string, number>;
 }
 
 export interface AssistantMessage {
@@ -128,6 +135,8 @@ interface Actions {
   revertLegalAct: () => void;
   payFine: (fineId: string) => void;
   resetDemo: (preset?: DemoPreset) => void;
+  /** Demo only: re-submits Marta's challenge with the sample documents so the intake replays. */
+  replayHeroSubmission: () => string | null;
   /** Restarts simulated background steps that a page reload interrupted. */
   resumeSimulations: () => void;
   askAssistant: (question: string) => void;
@@ -169,6 +178,7 @@ function initialData(preset: DemoPreset = "submitted"): DemoData {
     assistantTyping: false,
     findingReviews: {},
     verifiedFields: {},
+    intakeProgress: {},
   };
 }
 
@@ -186,6 +196,19 @@ function replaceById<T extends { id: string }>(items: T[], updated: T): T[] {
   return exists
     ? items.map((item) => (item.id === updated.id ? updated : item))
     : [...items, updated];
+}
+
+/** The challenge Marta files in the demo: sample reason, structured facts and documents. */
+function heroDraft(owner: Citizen, allFines: Fine[]): ChallengeDraft {
+  const draft: ChallengeDraft = {
+    ...emptyDraft(HERO_FINE_ID),
+    step: 3,
+    reason: "I wasn't driving",
+    facts: [...aiScripts.structuredFacts],
+    evidence: SAMPLE_EVIDENCE,
+  };
+  const fine = allFines.find((f) => f.id === HERO_FINE_ID);
+  return fine ? { ...draft, request: draftRequest(draft, fine, owner) } : draft;
 }
 
 /** Only plain demo data is persisted; actions are recreated on load. */
@@ -208,6 +231,7 @@ function persistedData(state: AppState): DemoData {
     assistantTyping: false,
     findingReviews: state.findingReviews,
     verifiedFields: state.verifiedFields,
+    intakeProgress: state.intakeProgress,
   };
 }
 
@@ -218,6 +242,14 @@ export const useAppStore = create<AppState>()(
     (set, get) => {
       const updateDraft = (patch: Partial<ChallengeDraft>) =>
         set((s) => ({ draft: { ...s.draft, ...patch }, draftError: "" }));
+
+      /** Advances the intake analysis one step; the last step completes the automatic checks. */
+      const advanceIntake = (caseId: string) => {
+        const done = (get().intakeProgress[caseId] ?? 0) + 1;
+        set((s) => ({ intakeProgress: { ...s.intakeProgress, [caseId]: done } }));
+        if (done >= INTAKE_STEPS.length) finishAutomaticChecks(caseId);
+        else schedule(() => advanceIntake(caseId), SIMULATION_DELAYS.intakeStep);
+      };
 
       const finishAutomaticChecks = (caseId: string) => {
         const current = get().challenges.find((c) => c.id === caseId);
@@ -307,7 +339,8 @@ export const useAppStore = create<AppState>()(
             challenges: replaceById(s.challenges, result.challenge),
             audit: [...s.audit, ...result.audit],
           }));
-          schedule(() => finishAutomaticChecks(caseId), SIMULATION_DELAYS.checksDone);
+          set((s) => ({ intakeProgress: { ...s.intakeProgress, [caseId]: 0 } }));
+          schedule(() => advanceIntake(caseId), SIMULATION_DELAYS.intakeStep);
           return caseId;
         },
 
@@ -410,6 +443,20 @@ export const useAppStore = create<AppState>()(
             fines: s.fines.map((f) => (f.id === fineId ? { ...f, paidOn: DEMO_TODAY } : f)),
           })),
 
+        replayHeroSubmission: () => {
+          cancelScheduled();
+          const fresh = initialData("beforeChallenge");
+          set((s) => ({
+            challenges: s.challenges.filter((c) => c.id !== HERO_CASE_ID),
+            audit: s.audit.filter((entry) => entry.caseId !== HERO_CASE_ID),
+            intakeProgress: {},
+            findingReviews: Object.fromEntries(
+              Object.entries(s.findingReviews).filter(([id]) => !id.startsWith(`${HERO_CASE_ID}:`)),
+            ),
+            draft: heroDraft(fresh.citizen, s.fines),
+          }));
+          return get().submitChallenge();
+        },
         resetDemo: (preset) => {
           cancelScheduled();
           set(initialData(preset));
@@ -499,10 +546,13 @@ export const useAppStore = create<AppState>()(
         },
         resumeSimulations: () => {
           const { challenges: all, refunds: allRefunds, citizen: owner } = get();
+          // Continue intakes a reload interrupted; older Received cases just finish their checks.
           all
             .filter((c) => c.status === "Received")
             .forEach((c) =>
-              schedule(() => finishAutomaticChecks(c.id), SIMULATION_DELAYS.checksDone),
+              isIntakeComplete(c.id, get().intakeProgress)
+                ? finishAutomaticChecks(c.id)
+                : schedule(() => advanceIntake(c.id), SIMULATION_DELAYS.intakeStep),
             );
           allRefunds
             .filter(

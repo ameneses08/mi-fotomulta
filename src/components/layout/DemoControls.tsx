@@ -1,4 +1,4 @@
-import { RotateCcw, Settings2, Undo2, UserRound } from "lucide-react";
+import { Play, RotateCcw, Settings2, Undo2, UserRound } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,6 +10,7 @@ export function DemoControls() {
   const resetDemo = useAppStore((s) => s.resetDemo);
   const revertLegalAct = useAppStore((s) => s.revertLegalAct);
   const canRevert = useAppStore((s) => s.actSnapshot !== null);
+  const replay = useAppStore((s) => s.replayHeroSubmission);
 
   const run = (action: () => void) => {
     action();
@@ -35,6 +36,10 @@ export function DemoControls() {
           <Button variant="outline" onClick={() => run(() => resetDemo("beforeChallenge"))}>
             <UserRound size={16} aria-hidden="true" />
             Reset to before Marta's challenge
+          </Button>
+          <Button variant="outline" onClick={() => run(() => replay())}>
+            <Play size={16} aria-hidden="true" />
+            Replay Marta's submission
           </Button>
           <Button variant="outline" disabled={!canRevert} onClick={() => run(revertLegalAct)}>
             <Undo2 size={16} aria-hidden="true" />

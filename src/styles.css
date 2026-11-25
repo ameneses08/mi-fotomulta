@@ -1485,3 +1485,25 @@
     grid-template-columns: 1fr;
   }
 }
+.intake-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.intake-step.done {
+  color: var(--success);
+}
+.intake-step.current {
+  color: var(--primary);
+  font-weight: 600;
+}
+.analysing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+}
