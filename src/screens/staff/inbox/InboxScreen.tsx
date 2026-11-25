@@ -3,6 +3,7 @@ import { StaffLayout } from "@/components/layout/StaffLayout";
 import { INSPECTOR_NAME } from "@/data/mockData";
 import { ALL_FILTERS, filterRows, type InboxFilters as Filters } from "@/lib/queue";
 import { InboxFilters } from "./InboxFilters";
+import { IntakeBanner } from "./IntakeBanner";
 import { InboxRow } from "./InboxRow";
 import { SummaryCards } from "./SummaryCards";
 import { useQueue } from "./useQueue";
@@ -10,7 +11,7 @@ import { useQueue } from "./useQueue";
 const COLUMNS = ["Priority", "Case", "Type", "Status", "Legal clock", "Flags", "Assigned to"];
 
 export function InboxScreen() {
-  const { rows, groups, summary } = useQueue();
+  const { rows, groups, summary, intake } = useQueue();
   const [filters, setFilters] = useState<Filters>(ALL_FILTERS);
   const visible = filterRows(rows, filters, INSPECTOR_NAME);
 
@@ -20,6 +21,7 @@ export function InboxScreen() {
       <p className="page-subtitle">
         Triaged by priority and deadline. Legal clocks count working days.
       </p>
+      <IntakeBanner summary={intake} />
       <SummaryCards summary={summary} />
       <InboxFilters value={filters} onChange={setFilters} />
       <div className="table-wrap">
