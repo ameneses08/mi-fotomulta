@@ -58,37 +58,103 @@ formatting errors, 7 react-refresh warnings inside generated shadcn/ui files).
 
 ```
 src/routes/       TanStack file routes – thin: params + head + render one screen
-src/screens/      one folder per area (home, citizen, staff, demo) with screen components
-src/components/   reusable UI (StatusBadge, StageTracker, AIPanel, SourceTag, layouts)
+src/screens/      home/, citizen/ (+ challenge/), staff/{queue,case,acts}/, demo/
+src/components/   reusable UI: StatusBadge, StageTracker, ProgressSteps, AIPanel, SourceTag,
+                  DataRow, RuleCheckList, LegalClockBar, AuditLog, Notice; layout/ holds
+                  SiteHeader, CitizenLayout, StaffLayout, DemoControls
 src/components/ui shadcn/ui primitives (generated, Lovable template)
-src/types/        domain entities and status unions
-src/data/         mockData.ts, statusMessages.ts, aiScripts.ts – all copy and fixtures
-src/lib/          pure, typed business logic + unit tests (rules, transitions, sla, format…)
-src/store/        appStore.ts – Zustand state; actions call src/lib and write audit entries
+src/types/        entities.ts (Fine, Camera, LegalAct, ChallengeCase, RefundCase, AuditEntry,
+                  Consent, RuleCheck…) and status.ts (all status/union types)
+src/data/         mockData.ts (fixtures + DEMO_TODAY), statusMessages.ts (citizen copy, tones),
+                  aiScripts.ts (every simulated AI text), ruleCatalogue.ts (R1–R12 titles/levels)
+src/lib/          pure functions + *.test.ts:
+                  transitions.ts  changeStatus + transition tables + audit entries
+                  rules.ts        derived fine status, refund eligibility, rule checks R1–R12
+                  sla.ts          working days, legal clocks, expected dates (SLA_CONFIG)
+                  decision.ts     inspector decisions → changeStatus + AI accepted/overridden
+                  revocation.ts   bulk act preview and registration (one audit entry per fine)
+                  refund.ts       bank details, consent, R12 auto-verification, refund decisions
+                  challenge.ts    wizard validation, request drafting, submission, auto-checks
+                  queue.ts        S1 rows, risk sorting, grouping, summary
+                  messages.ts     status messages, holder label, tracker stages, citizen history
+                  brief.ts        scripted AI case brief and citizen-message drafts
+                  format.ts       money, dates, {placeholder} templates
+src/store/        appStore.ts (state + actions), selectors.ts (memoised derived reads),
+                  demoClock.ts (demo timestamps and cancellable simulated delays)
+src/hooks/        useHighlightOnChange (tracker flash when the status changes)
 ```
 
-Data flow: components read state through selectors/hooks and call store actions. Store actions
-call pure functions in `src/lib/` and commit the result. Derived values (fine status, refund
-eligibility, rule checks, legal clocks) are computed from state, never stored as strings.
+Data flow: components read state through selectors and call store actions. Actions call pure
+functions in `src/lib/`, which return the new entity plus audit entries; the store commits both.
+Fine statuses, refund eligibility, rule checks and legal clocks are derived from state on every
+render – nothing is stored as a display string. `/demo` renders the citizen `CaseView` and the
+staff `ChallengeDetail` from the same store, so a decision on the right updates the phone.
 
 ## Conventions
 
-- Prettier config in `.prettierrc` (double quotes, 100 cols). `npm run lint` must be clean.
+- Prettier config in `.prettierrc` (double quotes, 100 cols). `npm run lint` must have 0 errors.
+  The 6 remaining warnings are react-refresh hints inside generated shadcn/ui files.
 - PascalCase component files in `src/components` and `src/screens`; camelCase for `src/lib`,
-  `src/data`, `src/store`. Route files follow TanStack naming.
+  `src/data`, `src/store`. Route files follow TanStack naming (`staff_.cases.$id.tsx`).
 - Components aim for under ~150 lines; extract sub-components/hooks instead of growing.
 - No `any`, no `@ts-ignore`, no `console.log`, no commented-out code.
 - Every status change goes through `changeStatus()` in `src/lib/transitions.ts`.
-- Conventional Commits; run typecheck, lint, tests and build before every commit.
+- All citizen status copy in `statusMessages.ts`; all AI text in `aiScripts.ts`.
+- Conventional Commits; run `npm run check` (typecheck, lint, tests, build) before every commit.
 
 ## Decisions and assumptions
 
-- **No `src/pages/`.** TanStack Start owns `src/routes/` and its README forbids `src/pages/`
-  (it confuses the router conventions). Screen components live in `src/screens/` instead and
-  route files stay thin. This is the only deviation from the target architecture.
+Structure
+
+- **No `src/pages/`.** TanStack Start owns `src/routes/` and its README forbids `src/pages/`.
+  Screens live in `src/screens/` and route files stay thin. Only deviation from the target
+  architecture. Extra lib modules (decision, revocation, refund, challenge, queue, messages,
+  brief) keep `rules.ts` and `transitions.ts` small.
 - `npm install` is used locally; `package-lock.json` is not committed because Lovable uses
   `bun.lock`. No dependencies were added or removed, so `bun.lock` stays valid.
 - Unused shadcn/ui primitives and template dependencies (recharts, embla, etc.) are left in
   place: they belong to Lovable's template and removing them would require regenerating
   `bun.lock` with bun. The Lovable error-reporting files in `src/lib/` are kept for the same
   reason.
+- The screen migration landed as one larger commit (`refactor: rebuild screens…`) because the
+  old screens depended on the old data shapes; every other step is its own commit.
+- Commit `126d18d` (sla) does not typecheck on its own: its test fixture imports a type from
+  `rules.ts`, committed one commit later. Build and tests pass there; history was not rewritten.
+
+Demo behaviour
+
+- **Fixed demo date: 25 Nov 2026** (`DEMO_TODAY`). Legal clocks and expected dates are computed
+  from it so the recording is deterministic. Audit timestamps use that date with the real time
+  of day.
+- **No persistence** (Lovable guidance: no browser storage). A full reload resets the demo.
+- C-1042 is seeded in "Validating" so `/staff` and `/demo` work immediately. Demo controls →
+  "Reset to before Marta's challenge" removes it so the citizen journey starts fresh.
+  Submitting C3 always creates a new submission at "Received" (replacing any earlier C-1042);
+  after 3 s simulated automatic checks move it to "Validating" held by Inspector Laura Gómez.
+- Scenario A/B is not a flag: it is whether the bulk act is "In force". The rules engine
+  re-derives everything from that. "Revert (demo only)" restores the refunds snapshot taken at
+  registration and writes an audit entry.
+- A second, older act (CAM-SUB100) is already in force so that staff refunds in "Verifying
+  payment details" have a legal basis (R11 Pass).
+- In Scenario A, confirming a bank account moves R-1044 to "Verifying payment details"; after
+  2.5 s it is auto-approved when R11 and R12 pass at level A (R12 automation).
+- `payFine` simulates a payment (no money moves) – kept from the Lovable version.
+
+Rules (R1–R12)
+
+- Result semantics: Pass = nothing to act on; Flag = needs a human; Fail = requirement not met.
+  No check closes a case or removes the right to challenge.
+- Only applicable rules are listed: R7 for "I wasn't driving", R8 for "Vehicle sold", R10 only
+  for fines on non-compliant cameras, R2 is applied at fine level (no case is created).
+- R5 notification window: 3 working days after the infraction (assumption).
+- R9: cases filed by a representative are flagged as templated; grouping is overview only.
+- R12: human approval above COP 2,000,000 (`RULES_CONFIG.refundHumanThreshold`) or when the
+  holder is not the claimant.
+- Decision "Request correction" uses the inspector's reason as `{what}`; "Schedule hearing" sets
+  a virtual hearing 5 working days later at 09:30.
+
+Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
+
+- Validation 2, decision 10, refund payment 5 (after approval), appeal 10, correction 5, hearing
+  notice 5 working days. "At risk" from 70% of the legal clock.
+- **TODO:** Colombian public holidays (e.g. 16 Nov 2026) are not modelled – weekdays only.
