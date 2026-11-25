@@ -94,8 +94,8 @@ Before recording: open `/demo`, click **Demo controls → Reset to before Marta'
    act as in force** → type a name → **Sign and register**. Scenario A.
 10. **Refunds**: auto-approved sample, R-1050 held above COP 1,000,000, fraud flags (holder
     mismatch, duplicate claim, one account for three claimants). On R-1047 (holder mismatch),
-    **Request documents** with a reason – while an account is being verified the status model
-    allows Approve or Needs correction, not Reject.
+    **Request documents** with a reason; **Reject** (reason required) is also available while
+    verifying, e.g. when fraud is confirmed.
 11. **Audit log**: filter by actor "AI assistant", then by case C-1042.
 12. Sign out → citizen: F-2042 and F-2044 now "Revoked"; ask the assistant **When will I get my
     refund?** → "ready". Open the refund, add a fictional account, tick the separate consent →

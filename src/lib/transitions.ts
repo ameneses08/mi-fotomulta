@@ -23,7 +23,7 @@ export const CHALLENGE_TRANSITIONS: Record<ChallengeStatus, readonly ChallengeSt
 export const REFUND_TRANSITIONS: Record<RefundStatus, readonly RefundStatus[]> = {
   Eligible: ["Verifying payment details"],
   "On hold": ["Eligible", "Rejected"],
-  "Verifying payment details": ["Approved", "Needs correction"],
+  "Verifying payment details": ["Approved", "Needs correction", "Rejected"],
   "Needs correction": ["Verifying payment details"],
   Approved: ["Paid"],
   Paid: [],

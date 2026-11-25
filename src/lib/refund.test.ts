@@ -118,6 +118,22 @@ describe("decideRefund and autoVerifyRefund", () => {
     expect(result.ok && result.refund.messageValues).toMatchObject({ date: "02 Dec 2026" });
   });
 
+  it("rejects during verification with a required reason", () => {
+    const refund = makeRefund({ status: "Verifying payment details" });
+    const rejected = decideRefund(
+      refund,
+      "Reject",
+      "Laura Gómez",
+      "Fraud confirmed",
+      "2026-11-25",
+      timestamp,
+    );
+    expect(rejected.ok && rejected.refund.status).toBe("Rejected");
+    expect(decideRefund(refund, "Reject", "Laura Gómez", "  ", "2026-11-25", timestamp).ok).toBe(
+      false,
+    );
+  });
+
   it("approves automatically when R11 and R12 pass at level A", () => {
     const refund = makeRefund({ status: "Verifying payment details", bankAccount: account });
     const result = autoVerifyRefund(refund, { ...ctx, refunds: [refund] }, "2026-11-25", timestamp);
@@ -140,6 +156,7 @@ describe("availableRefundDecisions", () => {
     expect(availableRefundDecisions("Verifying payment details")).toEqual([
       "Approve",
       "Request correction",
+      "Reject",
     ]);
     expect(availableRefundDecisions("On hold")).toEqual(["Reject"]);
     expect(availableRefundDecisions("Appealed")).toEqual(["Approve", "Reject"]);

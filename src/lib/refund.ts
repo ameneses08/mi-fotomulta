@@ -118,7 +118,7 @@ const DECISION_TARGETS: Record<RefundDecisionKind, RefundStatus> = {
   Reject: "Rejected",
 };
 
-/** Staff refund decisions the status model allows from this status (e.g. no Reject while verifying). */
+/** Staff refund decisions the status model allows from this status. */
 export function availableRefundDecisions(status: RefundStatus): RefundDecisionKind[] {
   const allowed = REFUND_TRANSITIONS[status];
   return (Object.keys(DECISION_TARGETS) as RefundDecisionKind[]).filter((kind) =>

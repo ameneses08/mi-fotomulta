@@ -117,6 +117,7 @@ describe("changeStatus", () => {
     ["Eligible", "Verifying payment details"],
     ["Verifying payment details", "Approved"],
     ["Verifying payment details", "Needs correction"],
+    ["Verifying payment details", "Rejected"],
     ["Approved", "Paid"],
     ["Rejected", "Appealed"],
   ])("allows refund %s → %s", (from, to) => {

@@ -281,6 +281,13 @@ Iteration 3.1 (final polish)
     the segment's own decision.
 - Feature freeze: `main` at tag `v1.3-demo` is the version for recording.
 
+Iteration 3.2
+
+- **Status model change (agreed with P5/P6):** Verifying payment details → Rejected is now
+  allowed (e.g. fraud confirmed during verification). The refund queue and the case refund panel
+  offer Approve, Request documents and Reject while verifying; every decision still needs a
+  written reason (`changeStatus`). This supersedes the iteration 3.1 spec-conflict note.
+
 Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
 
 - Validation 2, decision 10, refund payment 5 (after approval), appeal 10, correction 5, hearing

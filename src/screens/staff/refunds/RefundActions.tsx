@@ -22,7 +22,7 @@ export function RefundActions({ refund }: { refund: RefundCase }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
 
-  // Only the decisions the status model allows (no Reject while the account is being verified).
+  // Only the decisions the status model allows from the current status.
   const options = availableRefundDecisions(refund.status);
   if (refund.status !== "Verifying payment details" || !options.length) {
     return (
