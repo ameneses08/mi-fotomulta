@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   autoVerifyRefund,
   decideRefund,
-  EMPTY_BANK_FORM,
+  bankFormFromData,
+  DEMO_BANK_FORM,
+  normaliseAccount,
   recoverableAmount,
   submitBankDetails,
-  validateBankForm,
+  validateBankFields,
 } from "@/lib/refund";
 import { makeAct, makeContext, makeFine, makeRefund, unauthorisedCamera } from "@/test/fixtures";
 import type { Citizen } from "@/types";
@@ -14,23 +16,60 @@ const citizen: Citizen = { name: "Test Owner", firstName: "Test", document: "1",
 const form = { bank: "Bancolombia", type: "Savings" as const, account: "12345678", consent: true };
 const timestamp = "2026-11-25T12:00:00.000Z";
 
-describe("validateBankForm", () => {
-  it("requires a bank and a 6–20 digit account", () => {
-    expect(validateBankForm({ ...form, account: "12a" })).not.toBeNull();
-    expect(validateBankForm({ ...form, bank: "" })).not.toBeNull();
+describe("validateBankFields", () => {
+  it("reports each wrong field separately", () => {
+    expect(validateBankFields({ ...form, bank: "" })).toEqual({ bank: "Choose a bank." });
+    expect(validateBankFields({ ...form, account: "12a" })).toEqual({
+      account: "Enter an account number with 6–20 digits.",
+    });
+    expect(validateBankFields({ ...form, consent: false })).toEqual({
+      consent: "Your separate consent is required to use these payment details.",
+    });
   });
 
-  it("requires the separate consent", () => {
-    expect(validateBankForm({ ...form, consent: false })).toMatch(/consent/);
-    expect(validateBankForm(form)).toBeNull();
+  it("accepts spaces and dashes in the account number", () => {
+    expect(validateBankFields({ ...form, account: " 1234-5678 90 " })).toEqual({});
+    expect(normaliseAccount(" 1234-5678 90 ")).toBe("1234567890");
   });
 
-  it("starts empty with consent unticked", () => {
-    expect(EMPTY_BANK_FORM.consent).toBe(false);
+  it("keeps the 6–20 digit rule", () => {
+    expect(validateBankFields({ ...form, account: "12345" }).account).toBeDefined();
+    expect(validateBankFields({ ...form, account: "1".repeat(21) }).account).toBeDefined();
+  });
+
+  it("reads a bank form from the submitted fields", () => {
+    const data = new FormData();
+    data.set("bank", "Davivienda");
+    data.set("type", "Checking");
+    data.set("account", "1234 5678");
+    data.set("consent", "on");
+    expect(bankFormFromData(data)).toEqual({
+      bank: "Davivienda",
+      type: "Checking",
+      account: "1234 5678",
+      consent: true,
+    });
+  });
+
+  it("starts prefilled with a fictional account and consent unticked", () => {
+    expect(DEMO_BANK_FORM).toMatchObject({ bank: "Bancolombia", type: "Savings", consent: false });
+    expect(validateBankFields(DEMO_BANK_FORM)).toEqual({
+      consent: "Your separate consent is required to use these payment details.",
+    });
   });
 });
 
 describe("submitBankDetails", () => {
+  it("returns per-field errors instead of saving", () => {
+    const result = submitBankDetails(
+      makeRefund({ status: "Eligible" }),
+      { ...form, bank: "" },
+      citizen,
+      timestamp,
+    );
+    expect(result).toEqual({ ok: false, errors: { bank: "Choose a bank." } });
+  });
+
   it("moves an eligible refund to verification and stores only the last four digits", () => {
     const result = submitBankDetails(makeRefund({ status: "Eligible" }), form, citizen, timestamp);
     expect(result.ok && result.refund.status).toBe("Verifying payment details");

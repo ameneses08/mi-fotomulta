@@ -1,3 +1,4 @@
+import { MOCK_BANK_ACCOUNT } from "@/data/mockData";
 import { formatCOP, formatDate, lastFour } from "@/lib/format";
 import { evaluateRefundRules } from "@/lib/rules";
 import type { RulesContext } from "@/lib/rules";
@@ -21,20 +22,56 @@ export interface BankForm {
   consent: boolean;
 }
 
-export const EMPTY_BANK_FORM: BankForm = { bank: "", type: "Savings", account: "", consent: false };
+export type BankField = "bank" | "account" | "consent";
+export type BankFormErrors = Partial<Record<BankField, string>>;
+
+/** Prefilled fictional account so the recording only needs the consent tick. */
+export const DEMO_BANK_FORM: BankForm = { ...MOCK_BANK_ACCOUNT, consent: false };
 
 export const CONSENT_PURPOSE = "The SDM uses this account only to pay this refund.";
 
-export function validateBankForm(form: BankForm): string | null {
-  if (!form.bank.trim() || !/^\d{6,20}$/.test(form.account)) {
-    return "Choose a bank and enter an account number with 6–20 digits.";
-  }
-  if (!form.consent) return "Your separate consent is required to use these payment details.";
-  return null;
+export const BANK_ERRORS: Record<BankField, string> = {
+  bank: "Choose a bank.",
+  account: "Enter an account number with 6–20 digits.",
+  consent: "Your separate consent is required to use these payment details.",
+};
+
+/** People type account numbers with spaces, dashes or dots; only the digits count. */
+export function normaliseAccount(value: string): string {
+  return value.replace(/[\s.-]/g, "");
+}
+
+/** One message per wrong field. An empty object means the form is valid. */
+export function validateBankFields(form: BankForm): BankFormErrors {
+  const errors: BankFormErrors = {};
+  if (!form.bank.trim()) errors.bank = BANK_ERRORS.bank;
+  if (!/^\d{6,20}$/.test(normaliseAccount(form.account))) errors.account = BANK_ERRORS.account;
+  if (!form.consent) errors.consent = BANK_ERRORS.consent;
+  return errors;
+}
+
+/**
+ * Reads the values actually shown in the form at submit time. Browser autofill and form restore
+ * can fill fields without change events, so the submitted fields are the source of truth.
+ */
+export function bankFormFromData(data: FormData): BankForm {
+  const text = (name: string) => {
+    const value = data.get(name);
+    return typeof value === "string" ? value : "";
+  };
+  return {
+    bank: text("bank"),
+    type: text("type") === "Checking" ? "Checking" : "Savings",
+    account: text("account"),
+    consent: data.get("consent") !== null,
+  };
 }
 
 type RefundResult =
   { ok: true; refund: RefundCase; audit: AuditEntry[] } | { ok: false; error: string };
+
+type SubmitResult =
+  { ok: true; refund: RefundCase; audit: AuditEntry[] } | { ok: false; errors: BankFormErrors };
 
 /**
  * Saves the account in the citizen's name with separate consent. An Eligible refund moves on
@@ -45,15 +82,15 @@ export function submitBankDetails(
   form: BankForm,
   citizen: Citizen,
   timestamp: IsoTimestamp,
-): RefundResult {
-  const error = validateBankForm(form);
-  if (error) return { ok: false, error };
+): SubmitResult {
+  const errors = validateBankFields(form);
+  if (Object.keys(errors).length) return { ok: false, errors };
   const withDetails: RefundCase = {
     ...refund,
     bankAccount: {
       bank: form.bank,
       type: form.type,
-      last4: lastFour(form.account),
+      last4: lastFour(normaliseAccount(form.account)),
       holderName: citizen.name,
       holderDocument: citizen.document,
     },
@@ -71,7 +108,9 @@ export function submitBankDetails(
       timestamp,
     },
   );
-  return result.ok ? { ok: true, refund: result.entity, audit: [result.audit] } : result;
+  return result.ok
+    ? { ok: true, refund: result.entity, audit: [result.audit] }
+    : { ok: false, errors: { account: result.error } };
 }
 
 export function decideRefund(

@@ -151,6 +151,12 @@ Demo behaviour
   payment details" have a legal basis (R11 Pass).
 - In Scenario A, confirming a bank account moves R-1044 to "Verifying payment details"; after
   2.5 s it is auto-approved when R11 and R12 pass at level A (R12 automation).
+- Refund bank form: the fields are **uncontrolled** and read with `FormData` at submit, so
+  values the browser fills without change events (autofill, form restore, typing before the page
+  finished loading) are never lost; changes are still mirrored to the store for reload safety,
+  and the form remounts once after hydration to show restored values. Errors are per field.
+  The account number ignores spaces, dots and dashes (6–20 digits). The form is prefilled with a
+  fictional Bancolombia savings account (`MOCK_BANK_ACCOUNT`); consent always starts unticked.
 - `payFine` simulates a payment (no money moves) – kept from the Lovable version.
 
 Rules (R1–R12)

@@ -34,9 +34,10 @@ import { applyDecision } from "@/lib/decision";
 import {
   autoVerifyRefund,
   decideRefund,
-  EMPTY_BANK_FORM,
+  DEMO_BANK_FORM,
   submitBankDetails,
   type BankForm,
+  type BankFormErrors,
 } from "@/lib/refund";
 import { registerAct } from "@/lib/revocation";
 import { createAuditEntry } from "@/lib/transitions";
@@ -68,7 +69,7 @@ interface DemoData {
   draft: ChallengeDraft;
   draftError: string;
   bankForm: BankForm;
-  bankError: string;
+  bankErrors: BankFormErrors;
   bankSaved: boolean;
   /** State before the bulk act was registered, so the demo can revert it. */
   actSnapshot: { legalActs: LegalAct[]; refunds: RefundCase[] } | null;
@@ -108,7 +109,8 @@ interface Actions {
   decideChallenge: (caseId: string, request: DecisionRequest) => string | null;
   decideRefundCase: (refundId: string, kind: RefundDecisionKind, reason: string) => string | null;
   setBankField: <K extends keyof BankForm>(field: K, value: BankForm[K]) => void;
-  saveBankDetails: (refundId: string) => void;
+  /** `submitted` are the values read from the form fields at submit time. */
+  saveBankDetails: (refundId: string, submitted?: BankForm) => void;
   registerLegalAct: (actId: string, official: string) => string | null;
   revertLegalAct: () => void;
   payFine: (fineId: string) => void;
@@ -139,8 +141,8 @@ function initialData(preset: DemoPreset = "submitted"): DemoData {
     audit: initialAudit.filter((entry) => keep(entry.caseId)),
     draft: emptyDraft(HERO_FINE_ID),
     draftError: "",
-    bankForm: EMPTY_BANK_FORM,
-    bankError: "",
+    bankForm: DEMO_BANK_FORM,
+    bankErrors: {},
     bankSaved: false,
     actSnapshot: null,
     assistantMessages: [],
@@ -173,7 +175,7 @@ function persistedData(state: AppState): DemoData {
     draft: state.draft,
     draftError: "",
     bankForm: state.bankForm,
-    bankError: "",
+    bankErrors: {},
     bankSaved: state.bankSaved,
     actSnapshot: state.actSnapshot,
     assistantMessages: state.assistantMessages,
@@ -309,23 +311,24 @@ export const useAppStore = create<AppState>()(
         setBankField: (field, value) =>
           set((s) => ({
             bankForm: { ...s.bankForm, [field]: value },
-            bankError: "",
+            bankErrors: { ...s.bankErrors, [field]: undefined },
             bankSaved: false,
           })),
-        saveBankDetails: (refundId) => {
+        saveBankDetails: (refundId, submitted) => {
+          if (submitted) set({ bankForm: submitted });
           const { refunds: all, bankForm, citizen: owner } = get();
           const current = all.find((r) => r.id === refundId);
           if (!current) return;
           const result = submitBankDetails(current, bankForm, owner, demoTimestamp());
           if (!result.ok) {
-            set({ bankError: result.error, bankSaved: false });
+            set({ bankErrors: result.errors, bankSaved: false });
             return;
           }
           set((s) => ({
             refunds: replaceById(s.refunds, result.refund),
             audit: [...s.audit, ...result.audit],
             bankSaved: true,
-            bankError: "",
+            bankErrors: {},
           }));
           schedule(() => runRefundCheck(refundId), SIMULATION_DELAYS.refundCheck);
         },

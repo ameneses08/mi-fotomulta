@@ -1365,3 +1365,13 @@
     white-space: nowrap;
   }
 }
+.field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--danger);
+}
+[aria-invalid="true"] {
+  border-color: var(--danger);
+}

@@ -18,7 +18,7 @@ import { aiScripts } from "./aiScripts";
 export const DEMO_TODAY = "2026-11-25";
 
 /** Version of this seed. Saved demos from another version are discarded on load. */
-export const DEMO_DATA_VERSION = 4;
+export const DEMO_DATA_VERSION = 5;
 
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
@@ -611,6 +611,13 @@ export const MOCK_SIGN_IN = {
   citizenCode: "482915",
   staffUsername: "laura.gomez",
   staffPassword: "demo-pass-2026",
+} as const;
+
+/** Prefilled fictional bank account for Marta's refund form (recording only needs consent). */
+export const MOCK_BANK_ACCOUNT = {
+  bank: "Bancolombia",
+  type: "Savings",
+  account: "40712345678",
 } as const;
 
 /** Fictional SDM inspectors a case can be assigned to. */
