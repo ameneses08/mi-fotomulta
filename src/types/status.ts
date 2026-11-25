@@ -34,8 +34,6 @@ export type Tone = "neutral" | "info" | "success" | "warning" | "danger";
 /** A = automated, S = AI-supported with human sign-off, H = human only. */
 export type RuleLevel = "A" | "S" | "H";
 
-export type RuleResult = "Pass" | "Flag" | "Fail";
-
 export type RuleId =
   "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R8" | "R9" | "R10" | "R11" | "R12";
 

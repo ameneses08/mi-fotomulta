@@ -1,12 +1,4 @@
-import type {
-  ChallengeStatus,
-  DecisionOutcome,
-  LegalActStatus,
-  RefundStatus,
-  RuleId,
-  RuleLevel,
-  RuleResult,
-} from "./status";
+import type { ChallengeStatus, DecisionOutcome, LegalActStatus, RefundStatus } from "./status";
 
 /** Dates are ISO strings: "2026-11-25" for days, full ISO for timestamps. */
 export type IsoDate = string;
@@ -182,12 +174,4 @@ export interface AuditEntry {
   from?: string;
   to?: string;
   reason: string;
-}
-
-export interface RuleCheck {
-  ruleId: RuleId;
-  title: string;
-  level: RuleLevel;
-  result: RuleResult;
-  detail: string;
 }

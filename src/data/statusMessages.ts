@@ -4,7 +4,6 @@ import type {
   FindingResult,
   FineStatus,
   RefundStatus,
-  RuleResult,
   Tone,
   TrackerStage,
 } from "@/types";
@@ -93,12 +92,6 @@ export const REFUND_STATUS_TONES: Record<RefundStatus, Tone> = {
   Paid: "success",
   Rejected: "danger",
   Appealed: "info",
-};
-
-export const RULE_RESULT_TONES: Record<RuleResult, Tone> = {
-  Pass: "success",
-  Flag: "warning",
-  Fail: "danger",
 };
 
 export const FINDING_RESULT_TONES: Record<FindingResult, Tone> = {
