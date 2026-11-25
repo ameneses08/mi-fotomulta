@@ -67,7 +67,8 @@ src/components/   reusable UI: StatusBadge, StageTracker, ProgressSteps, AIPanel
 src/components/ui shadcn/ui primitives (generated, Lovable template)
 src/types/        entities.ts (Fine, Camera, LegalAct, ChallengeCase, RefundCase, AuditEntry,
                   Consent, RuleCheck…) and status.ts (all status/union types)
-src/data/         mockData.ts (fixtures + DEMO_TODAY), statusMessages.ts (citizen copy, tones),
+src/data/         mockData.ts (fixtures + DEMO_TODAY), mockEvidence.ts (documents with
+                  AI-extracted fields), statusMessages.ts (citizen copy, tones),
                   aiScripts.ts (every simulated AI text), ruleCatalogue.ts (R1–R12 titles/levels)
 src/lib/          pure functions + *.test.ts:
                   transitions.ts  changeStatus + transition tables + audit entries
@@ -82,6 +83,11 @@ src/lib/          pure functions + *.test.ts:
                   assistant.ts    citizen assistant intents and answers from live state
                   citizenSummary  dashboard cards; cameras.ts camera status and range
                   audit.ts        audit-log filters; assignment.ts; signIn.ts mock validation
+                  analysis/       mock AI engine: dates, documents, registry, similarity,
+                                  fraud, review; index.ts = analyseCase / analyseRefund
+                  intake.ts       intake steps and the inbox "AI intake today" summary
+                  oversight.ts    AI oversight figures from the audit log
+                  fineActions.ts  which buttons a fine shows (R3, appeal)
                   messages.ts     status messages, holder label, tracker stages, citizen history
                   brief.ts        scripted AI case brief and citizen-message drafts
                   format.ts       money, dates, {placeholder} templates
@@ -202,6 +208,42 @@ Iteration 2 (UX, assistant, P6 staff screens)
 - Camera CAM-AN170 now has an authorisation that expired on 30 Sep 2026 (for the "Expired"
   state); its fines after that date are still non-compliant.
 - Refund queue seed adds R-1050–R-1053 (10 refunds in total) to populate the three sections.
+
+Iteration 3 (mock AI analyses for the administration)
+
+- **One source of truth:** every check and flag (R1–R12, groups, new evidence, refund fraud
+  flags) is produced by `src/lib/analysis` (`analyseCase`, `analyseRefund`). The old
+  `evaluateChallengeRules` / `evaluateRefundRules` / `fraudFlagsFor` were migrated and deleted.
+  `rules.ts` now only derives fine status and refund eligibility.
+- Findings are deterministic (no randomness, no clock except `DEMO_TODAY`) with stable ids
+  `${caseId}:${key}`. Inspector reviews are stored separately (`findingReviews`) and merged in;
+  a dismissed flag no longer counts for triage or "flagged" totals.
+- Result semantics: Pass / Flag / Info. Former "Fail" results became Flags. Info is used when
+  there is nothing to fix but a human must still decide (R7 when the driver is identified).
+- Triage: High = deadline at risk or a high-confidence open flag on Dates or Fraud; Medium = any
+  other open flag; Low = none. (Camera R4 flags alone are now Medium, not High.)
+- Similarity (R9): Dice coefficient over word bigrams of the filing text, as a whole percentage.
+  The LegalRápido template is long enough that filings score 96%. New evidence = any document
+  other than a power of attorney.
+- Fraud signals never reject: photo metadata (editing software or modified after capture),
+  expired power of attorney (C-1044 is paused as Needs correction by the system, an audited
+  routing step), duplicates, and the refund signals. A missing bank account is Info, not a flag.
+- A refund's R11 check excludes the refund itself, so an already-paid refund stays eligible.
+- Intake animation: six steps × 680 ms (~4 s), persisted per case in `intakeProgress` and resumed
+  after a reload; the last step completes the automatic checks (Received → Validating). Because
+  4 s is too short to switch screens by hand, Demo controls has **Replay Marta's submission**
+  (demo only): it removes C-1042 and re-submits it with the sample documents.
+- "AI intake today" counts open filings whose intake finished; "ready" = analysed minus flagged.
+- AI oversight assumption: **4 minutes of reading saved per summarised filing**
+  (`OVERSIGHT_CONFIG.minutesPerSummary`). A few earlier decisions this month (C-1031–C-1039,
+  cases no longer in the queue) are seeded in the audit log so the panel has history.
+- Citizen side: while a challenge exists the fine shows only "Track my challenge" (R3, also
+  enforced in the store); after a decision "Appeal the decision" moves Decided → Appealed.
+- Process notes (history not rewritten): commit `15146c7` went in with a Prettier lint error
+  because the check was piped through `grep`; `1d61299` (same message) fixes it. The iteration 2
+  audit-log commit claimed exact nav matching that never applied; `c2cc7f8` adds it. `c2cc7f8`
+  also missed the regenerated route tree, committed right after. Commits are now gated on the
+  real exit code of `npm run check`.
 
 Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
 

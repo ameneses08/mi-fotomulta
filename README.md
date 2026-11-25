@@ -60,6 +60,7 @@ See [CLAUDE.md](CLAUDE.md) for the architecture, conventions and every design de
 | `/staff/cameras`               | Camera check: Authorised / Expired / Unauthorised              |
 | `/staff/bulk-revocation`       | Legal act, affected fines, notification preview, one signature |
 | `/staff/audit`                 | Read-only, filterable audit log                                |
+| `/staff/ai-oversight`          | AI suggestions accepted/overridden, flag reviews, time saved   |
 | `/demo`                        | Marta's phone and the inspector's case view for C-1042         |
 
 ## Demo script (launch video, ~5 minutes)
@@ -97,6 +98,25 @@ Before recording: open `/demo`, click **Demo controls → Reset to before Marta'
 12. Sign out → citizen: F-2042 and F-2044 now "Revoked"; ask the assistant **When will I get my
     refund?** → "ready". Open the refund, add a fictional account, tick the separate consent →
     "Verifying" → "Approved" with an expected payment date.
+
+## AI analysis segment (~1 minute)
+
+All analyses are mock and deterministic: every take is identical.
+
+1. Open **`/demo`** → **Demo controls → Replay Marta's submission**. Left: Marta's phone shows
+   "Received – Automatic checks". Right: the case view runs the AI intake step by step (Reading
+   documents → … → Summary ready, ~4 s); then the phone moves to "Being checked".
+2. In the right pane read the **AI analysis – an inspector decides** report: filed on time,
+   statement signed and dated, names consistent, licence valid, and "Driver can be identified –
+   decision on the merits is human only (R7)". Open a **Why?**. Open the **Documents** tab:
+   extracted fields highlighted, tick **Verified by inspector** on one.
+3. Exit demo → sign in as staff → **Inbox**: the "AI intake today" banner. Open **C-1049** and
+   **Dismiss as false positive** the photo-metadata flag with a reason (e.g. "Original photo
+   checked at the counter"). Open **C-1048** and **Confirm flag** on the late notification (R5).
+4. Back on C-1042 (or in `/demo`): **Approve suggestion → Approve message and send decision**.
+5. Open **AI oversight**: suggestions accepted vs overridden, flags confirmed vs dismissed (the
+   dismissal you just made is listed), reading time saved, and the note that a named official
+   decides.
 
 ## Built with Lovable
 
