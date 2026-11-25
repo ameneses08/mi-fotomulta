@@ -1,7 +1,6 @@
 import { MOCK_BANK_ACCOUNT } from "@/data/mockData";
 import { formatCOP, formatDate, lastFour } from "@/lib/format";
-import { evaluateRefundRules } from "@/lib/rules";
-import type { RulesContext } from "@/lib/rules";
+import { analyseRefund, isOpenFlag, type AnalysisContext } from "@/lib/analysis";
 import { addWorkingDays, SLA_CONFIG } from "@/lib/sla";
 import { changeStatus } from "@/lib/transitions";
 import type {
@@ -138,17 +137,16 @@ export function decideRefund(
   return result.ok ? { ok: true, refund: result.entity, audit: [result.audit] } : result;
 }
 
-/** R12 automated path: approve when every refund rule passes at level A; otherwise leave for a human. */
+/** R12 automated path: approve only when the analysis has no open flag; otherwise a person decides. */
 export function autoVerifyRefund(
   refund: RefundCase,
-  ctx: RulesContext,
+  ctx: AnalysisContext,
   today: IsoDate,
   timestamp: IsoTimestamp,
 ): RefundResult | null {
   if (refund.status !== "Verifying payment details") return null;
-  const checks = evaluateRefundRules(refund, ctx);
-  const automatic = checks.every((c) => c.result === "Pass" && c.level === "A");
-  if (!automatic) return null;
+  const analysis = analyseRefund(refund.id, ctx);
+  if (!analysis || analysis.findings.some(isOpenFlag)) return null;
   return decideRefund(
     refund,
     "Approve",

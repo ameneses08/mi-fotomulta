@@ -8,10 +8,10 @@ import {
   priorityOf,
   summariseQueue,
 } from "@/lib/queue";
-import { makeChallenge, makeContext, makeRefund } from "@/test/fixtures";
+import { makeAnalysisContext, makeChallenge, makeRefund } from "@/test/fixtures";
+import type { AnalysisFinding } from "@/types";
 
-const today = "2026-11-25";
-const ctx = makeContext({
+const ctx = makeAnalysisContext({
   challenges: [
     makeChallenge({ id: "C-new", submittedOn: "2026-11-24", reason: "Other" }),
     makeChallenge({ id: "C-late", submittedOn: "2026-11-09" }),
@@ -26,21 +26,29 @@ const ctx = makeContext({
   ],
   refunds: [makeRefund({ status: "Verifying payment details" })],
 });
-const rows = buildChallengeRows(ctx, today);
+const rows = buildChallengeRows(ctx);
 
 describe("triage", () => {
-  it("rates priority from the legal clock and rule results", () => {
-    const pass = { ruleId: "R1" as const, title: "", level: "A" as const, detail: "" };
+  it("rates priority from the legal clock and open flags", () => {
+    const finding = (overrides: Partial<AnalysisFinding>): AnalysisFinding => ({
+      id: "C-1:x",
+      caseId: "C-1",
+      category: "Registry",
+      check: "",
+      result: "Flag",
+      evidence: "",
+      confidence: "Medium",
+      level: "A",
+      why: "",
+      reviewStatus: "Pending",
+      ...overrides,
+    });
+    const calm = { used: 1, total: 10, risk: "On track" as const };
     expect(priorityOf({ used: 9, total: 10, risk: "At risk" }, [])).toBe("High");
-    expect(
-      priorityOf({ used: 1, total: 10, risk: "On track" }, [{ ...pass, result: "Fail" }]),
-    ).toBe("High");
-    expect(
-      priorityOf({ used: 1, total: 10, risk: "On track" }, [{ ...pass, result: "Flag" }]),
-    ).toBe("Medium");
-    expect(
-      priorityOf({ used: 1, total: 10, risk: "On track" }, [{ ...pass, result: "Pass" }]),
-    ).toBe("Low");
+    expect(priorityOf(calm, [finding({ category: "Fraud", confidence: "High" })])).toBe("High");
+    expect(priorityOf(calm, [finding({})])).toBe("Medium");
+    expect(priorityOf(calm, [finding({ reviewStatus: "Dismissed" })])).toBe("Low");
+    expect(priorityOf(calm, [finding({ result: "Pass" })])).toBe("Low");
   });
 
   it("sorts open cases by priority and puts decided cases last", () => {

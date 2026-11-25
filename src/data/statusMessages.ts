@@ -1,6 +1,7 @@
 import type {
   ChallengeStatus,
   ClockRisk,
+  FindingResult,
   FineStatus,
   RefundStatus,
   RuleResult,
@@ -98,6 +99,12 @@ export const RULE_RESULT_TONES: Record<RuleResult, Tone> = {
   Pass: "success",
   Flag: "warning",
   Fail: "danger",
+};
+
+export const FINDING_RESULT_TONES: Record<FindingResult, Tone> = {
+  Pass: "success",
+  Flag: "warning",
+  Info: "info",
 };
 
 export const CLOCK_RISK_TONES: Record<ClockRisk, Tone> = {

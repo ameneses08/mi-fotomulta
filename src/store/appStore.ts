@@ -42,6 +42,7 @@ import {
 } from "@/lib/refund";
 import { registerAct } from "@/lib/revocation";
 import { createAuditEntry } from "@/lib/transitions";
+import type { AnalysisContext } from "@/lib/analysis";
 import type { RulesContext } from "@/lib/rules";
 import type {
   AuditEntry,
@@ -49,6 +50,7 @@ import type {
   ChallengeCase,
   Citizen,
   DecisionKind,
+  FindingReview,
   Fine,
   LegalAct,
   RefundCase,
@@ -76,6 +78,8 @@ interface DemoData {
   actSnapshot: { legalActs: LegalAct[]; refunds: RefundCase[] } | null;
   assistantMessages: AssistantMessage[];
   assistantTyping: boolean;
+  /** Inspector reviews of AI analysis flags, keyed by finding id. */
+  findingReviews: Record<string, FindingReview>;
 }
 
 export interface AssistantMessage {
@@ -149,12 +153,17 @@ function initialData(preset: DemoPreset = "submitted"): DemoData {
     actSnapshot: null,
     assistantMessages: [],
     assistantTyping: false,
+    findingReviews: {},
   };
 }
 
 export function rulesContextOf(state: DemoData): RulesContext {
   const { fines, cameras, legalActs, challenges, refunds } = state;
   return { fines, cameras, legalActs, challenges, refunds };
+}
+
+export function analysisContextOf(state: DemoData): AnalysisContext {
+  return { ...rulesContextOf(state), reviews: state.findingReviews, today: DEMO_TODAY };
 }
 
 function replaceById<T extends { id: string }>(items: T[], updated: T): T[] {
@@ -182,6 +191,7 @@ function persistedData(state: AppState): DemoData {
     actSnapshot: state.actSnapshot,
     assistantMessages: state.assistantMessages,
     assistantTyping: false,
+    findingReviews: state.findingReviews,
   };
 }
 
@@ -210,7 +220,7 @@ export const useAppStore = create<AppState>()(
         if (!current) return;
         const result = autoVerifyRefund(
           current,
-          rulesContextOf(state),
+          analysisContextOf(state),
           DEMO_TODAY,
           demoTimestamp(),
         );

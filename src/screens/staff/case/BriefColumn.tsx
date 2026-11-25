@@ -1,13 +1,13 @@
 import { AIPanel } from "@/components/AIPanel";
-import { RuleCheckList } from "@/components/RuleCheckList";
+import { FindingList } from "@/components/analysis/FindingList";
 import { RULES } from "@/data/ruleCatalogue";
 import { caseBriefFor } from "@/lib/brief";
-import { useRuleChecks } from "@/store/selectors";
+import { useAnalysis } from "@/store/selectors";
 import type { ChallengeCase } from "@/types";
 
 export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
   const brief = caseBriefFor(challenge);
-  const checks = useRuleChecks(challenge.id);
+  const analysis = useAnalysis(challenge.id);
 
   return (
     <section className="staff-column" aria-labelledby="brief-title">
@@ -37,7 +37,7 @@ export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
         A = automated · S = AI-supported, human signs off · H = human only. Checks route a case;
         they never close it.
       </p>
-      <RuleCheckList checks={checks} />
+      <FindingList findings={analysis?.findings ?? []} />
     </section>
   );
 }

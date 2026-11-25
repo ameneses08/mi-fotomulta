@@ -5,7 +5,7 @@ import { LegalClockBar } from "@/components/LegalClockBar";
 import { Notice } from "@/components/Notice";
 import { StatusBadge } from "@/components/StatusBadge";
 import { CHALLENGE_STATUS_TONES } from "@/data/statusMessages";
-import { hasNewEvidence } from "@/lib/rules";
+import { groupSimilarity, hasNewEvidence } from "@/lib/analysis/similarity";
 import { useQueue } from "../inbox/useQueue";
 
 export function GroupScreen({ id }: { id: string }) {
@@ -35,7 +35,14 @@ export function GroupScreen({ id }: { id: string }) {
               <caption className="sr-only">Cases in this group</caption>
               <thead>
                 <tr>
-                  {["Case", "Citizen and fine", "Evidence", "Status", "Legal clock"].map((c) => (
+                  {[
+                    "Case",
+                    "Citizen and fine",
+                    "Similarity",
+                    "Evidence",
+                    "Status",
+                    "Legal clock",
+                  ].map((c) => (
                     <th key={c} scope="col">
                       {c}
                     </th>
@@ -52,6 +59,9 @@ export function GroupScreen({ id }: { id: string }) {
                     <td>
                       <div>{challenge.citizenName}</div>
                       <div className="text-sm text-muted-foreground">Fine {challenge.fineId}</div>
+                    </td>
+                    <td className="font-medium">
+                      {groupSimilarity(challenge, group.cases).percent}%
                     </td>
                     <td>
                       {hasNewEvidence(challenge) ? (

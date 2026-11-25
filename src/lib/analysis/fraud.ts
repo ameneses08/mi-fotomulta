@@ -121,9 +121,9 @@ export function refundFraudFindings(refund: RefundCase, ctx: AnalysisContext): A
       {
         ...base,
         check: T.checks.holder,
-        result: holderOk ? "Pass" : "Flag",
+        result: !account ? "Info" : holderOk ? "Pass" : "Flag",
         evidence: "From: bank account details and claimant ID",
-        level: holderOk ? "A" : "H",
+        level: !account || holderOk ? "A" : "H",
         ruleId: "R12",
         why: !account
           ? T.why.holderMissing

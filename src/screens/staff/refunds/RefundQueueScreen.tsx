@@ -4,7 +4,7 @@ import { LevelBadge } from "@/components/LevelBadge";
 import { formatCOP } from "@/lib/format";
 import { buildRefundQueue, type RefundSection } from "@/lib/refundQueue";
 import { RULES_CONFIG } from "@/lib/rules";
-import { useRulesContext } from "@/store/selectors";
+import { useAnalysisContext } from "@/store/selectors";
 import type { RuleLevel } from "@/types";
 import { RefundItem } from "./RefundItem";
 
@@ -35,7 +35,7 @@ const SECTIONS: {
 ];
 
 export function RefundQueueScreen() {
-  const ctx = useRulesContext();
+  const ctx = useAnalysisContext();
   const queue = useMemo(() => buildRefundQueue(ctx), [ctx]);
 
   return (

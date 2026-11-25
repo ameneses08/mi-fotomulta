@@ -1,26 +1,26 @@
 import { AIPanel } from "@/components/AIPanel";
 import { AuditLog } from "@/components/AuditLog";
 import { DataRow } from "@/components/DataRow";
-import { RuleCheckList } from "@/components/RuleCheckList";
+import { FindingList } from "@/components/analysis/FindingList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { aiScripts } from "@/data/aiScripts";
+import { isOpenFlag } from "@/lib/analysis";
 import { formatCOP, formatDate } from "@/lib/format";
 import { refundMessage } from "@/lib/messages";
-import { useCaseAudit, useFine, useRuleChecks } from "@/store/selectors";
-import type { RefundCase, RuleCheck } from "@/types";
+import { useAnalysis, useCaseAudit, useFine } from "@/store/selectors";
+import type { AnalysisFinding, RefundCase } from "@/types";
 import { RefundDecisionPanel } from "./RefundDecisionPanel";
 
-function briefFor(checks: RuleCheck[]): string {
-  if (checks.some((c) => c.ruleId === "R11" && c.result !== "Pass"))
-    return aiScripts.refundBrief.onHold;
-  if (checks.some((c) => c.ruleId === "R12" && c.result === "Fail"))
-    return aiScripts.refundBrief.mismatch;
+function briefFor(findings: AnalysisFinding[]): string {
+  const open = findings.filter(isOpenFlag);
+  if (open.some((f) => f.ruleId === "R11")) return aiScripts.refundBrief.onHold;
+  if (open.some((f) => f.id.endsWith(":holder"))) return aiScripts.refundBrief.mismatch;
   return aiScripts.refundBrief.pass;
 }
 
 export function RefundDetail({ refund }: { refund: RefundCase }) {
   const fine = useFine(refund.fineId);
-  const checks = useRuleChecks(refund.id);
+  const findings = useAnalysis(refund.id)?.findings ?? [];
   const audit = useCaseAudit(refund.id);
   const account = refund.bankAccount;
 
@@ -64,10 +64,10 @@ export function RefundDetail({ refund }: { refund: RefundCase }) {
               Checks
             </h2>
             <AIPanel title="Refund brief" audience="staff" className="mt-0">
-              <p>{briefFor(checks)}</p>
+              <p>{briefFor(findings)}</p>
             </AIPanel>
-            <h3 className="column-subtitle">Rule checks</h3>
-            <RuleCheckList checks={checks} />
+            <h3 className="column-subtitle">AI analysis</h3>
+            <FindingList findings={findings} />
           </section>
           <RefundDecisionPanel key={refund.status} refund={refund} />
         </div>

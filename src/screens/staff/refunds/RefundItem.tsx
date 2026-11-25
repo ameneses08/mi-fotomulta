@@ -26,13 +26,13 @@ export function RefundItem({ item }: { item: RefundQueueItem }) {
       {notes.length > 0 && (
         <ul className="grid gap-1 text-sm">
           {notes.map((note) => (
-            <li key={note} className="flex items-start gap-2">
+            <li key={note.id} className="flex items-start gap-2">
               <AlertTriangle
                 size={15}
                 className="mt-1 shrink-0 text-tone-warning"
                 aria-hidden="true"
               />
-              {note}
+              {note.why}
             </li>
           ))}
         </ul>

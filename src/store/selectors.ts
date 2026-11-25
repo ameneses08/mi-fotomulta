@@ -1,12 +1,9 @@
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import {
-  deriveFineStatus,
-  evaluateChallengeRules,
-  evaluateRefundRules,
-  type RulesContext,
-} from "@/lib/rules";
-import type { AuditEntry, FineStatus, RuleCheck } from "@/types";
+import { DEMO_TODAY } from "@/data/mockData";
+import { analyseCase, analyseRefund, type AnalysisContext } from "@/lib/analysis";
+import { deriveFineStatus, type RulesContext } from "@/lib/rules";
+import type { AuditEntry, CaseAnalysis, FineStatus } from "@/types";
 import { useAppStore } from "./appStore";
 
 /** The slices the rules engine reads, selected shallowly so components re-render only on change. */
@@ -42,14 +39,17 @@ export function useFineStatus(fineId: string): FineStatus | undefined {
   }, [ctx, fineId]);
 }
 
-export function useRuleChecks(caseId: string): RuleCheck[] {
-  const ctx = useRulesContext();
-  return useMemo(() => {
-    const challenge = ctx.challenges.find((c) => c.id === caseId);
-    if (challenge) return evaluateChallengeRules(challenge, ctx);
-    const refund = ctx.refunds.find((r) => r.id === caseId);
-    return refund ? evaluateRefundRules(refund, ctx) : [];
-  }, [ctx, caseId]);
+/** The AI analysis context: rules data plus inspector reviews, selected shallowly. */
+export function useAnalysisContext(): AnalysisContext {
+  const rules = useRulesContext();
+  const reviews = useAppStore((s) => s.findingReviews);
+  return useMemo(() => ({ ...rules, reviews, today: DEMO_TODAY }), [rules, reviews]);
+}
+
+/** Mock AI analysis of a challenge or refund, recomputed only when its inputs change. */
+export function useAnalysis(caseId: string): CaseAnalysis | undefined {
+  const ctx = useAnalysisContext();
+  return useMemo(() => analyseCase(caseId, ctx) ?? analyseRefund(caseId, ctx), [ctx, caseId]);
 }
 
 /** Audit entries for one case, newest first. */

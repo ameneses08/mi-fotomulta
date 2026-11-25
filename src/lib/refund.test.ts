@@ -9,7 +9,13 @@ import {
   submitBankDetails,
   validateBankFields,
 } from "@/lib/refund";
-import { makeAct, makeContext, makeFine, makeRefund, unauthorisedCamera } from "@/test/fixtures";
+import {
+  makeAct,
+  makeAnalysisContext,
+  makeFine,
+  makeRefund,
+  unauthorisedCamera,
+} from "@/test/fixtures";
 import type { Citizen } from "@/types";
 
 const citizen: Citizen = { name: "Test Owner", firstName: "Test", document: "1", plate: "AAA111" };
@@ -86,7 +92,10 @@ describe("submitBankDetails", () => {
 
 describe("decideRefund and autoVerifyRefund", () => {
   const paidRevoked = makeFine({ cameraId: unauthorisedCamera.id, paidOn: "2026-11-05" });
-  const ctx = makeContext({ fines: [paidRevoked], legalActs: [makeAct({ status: "In force" })] });
+  const ctx = makeAnalysisContext({
+    fines: [paidRevoked],
+    legalActs: [makeAct({ status: "In force" })],
+  });
   const account = {
     bank: "B",
     type: "Savings" as const,
