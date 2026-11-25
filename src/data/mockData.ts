@@ -11,6 +11,15 @@ import type {
 } from "@/types";
 import { fillTemplate } from "@/lib/format";
 import { aiScripts } from "./aiScripts";
+import {
+  BILL_OF_SALE,
+  EDITED_PHOTO,
+  ENVELOPE_PHOTO,
+  EXPIRED_CALIBRATION,
+  HERO_EVIDENCE,
+  LEGAL_RAPIDO_TEMPLATE,
+  powerOfAttorney,
+} from "./mockEvidence";
 
 /** All people, plates, fines and acts below are fictional. */
 
@@ -18,7 +27,7 @@ import { aiScripts } from "./aiScripts";
 export const DEMO_TODAY = "2026-11-25";
 
 /** Version of this seed. Saved demos from another version are discarded on load. */
-export const DEMO_DATA_VERSION = 5;
+export const DEMO_DATA_VERSION = 6;
 
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
@@ -49,7 +58,7 @@ export const FACT_QUESTIONS = [
 ];
 
 /** Files added by "Use sample documents" in the challenge wizard, so no file picker is needed. */
-export const SAMPLE_EVIDENCE_FILES = ["cedula-marta-rodriguez.pdf", "signed-statement-driver.pdf"];
+export const SAMPLE_EVIDENCE = HERO_EVIDENCE;
 
 export const citizen: Citizen = {
   name: "Marta Rodríguez Peña",
@@ -183,7 +192,7 @@ export const fines: Fine[] = [
     id: "F-3106",
     owner: ["Sandra Milena Rojas", "51.902.443", "TRK550"],
     cameraId: "CAM-68-13",
-    dates: ["2026-10-09", "2026-10-20"],
+    dates: ["2026-10-09", "2026-10-19"],
   }),
   fine({
     id: "F-3107",
@@ -335,25 +344,44 @@ const templatedFacts = [
   "Under the applicable rules, fines from unauthorised devices lack legal effect and must be revoked.",
   "We request the revocation of the fine and the closure of the proceedings.",
 ];
-const powerOfAttorney: ChallengeCase["evidence"] = [
-  { name: "power-of-attorney.pdf", kind: "Power of attorney" },
-];
+interface LegalRapidoOptions {
+  extraEvidence?: ChallengeCase["evidence"];
+  /** Power-of-attorney expiry; valid unless stated. */
+  poaExpires?: string;
+  status?: ChallengeCase["status"];
+  messageValues?: ChallengeCase["messageValues"];
+}
 
 function legalRapido(
   id: string,
   fineId: string,
   submittedOn: string,
-  extraEvidence: ChallengeCase["evidence"] = [],
+  options: LegalRapidoOptions = {},
 ): ChallengeCase {
-  return challenge({
+  const fine = fines.find((f) => f.id === fineId);
+  const name = fine?.ownerName ?? "";
+  const base = challenge({
     id,
     fineId,
     reason: "Camera not authorised",
     submittedOn,
     facts: templatedFacts,
-    evidence: [...powerOfAttorney, ...extraEvidence],
+    evidence: [
+      powerOfAttorney(name, options.poaExpires ?? "2027-06-30"),
+      ...(options.extraEvidence ?? []),
+    ],
     representative: LEGAL_RAPIDO,
+    ...(options.status ? { status: options.status } : {}),
+    ...(options.messageValues ? { messageValues: options.messageValues } : {}),
   });
+  return {
+    ...base,
+    request: fillTemplate(LEGAL_RAPIDO_TEMPLATE, {
+      name,
+      fine_id: fineId,
+      plate: fine?.plate ?? "",
+    }),
+  };
 }
 
 export const heroChallenge: ChallengeCase = {
@@ -362,11 +390,8 @@ export const heroChallenge: ChallengeCase = {
     fineId: HERO_FINE_ID,
     reason: "I wasn't driving",
     submittedOn: "2026-11-20",
-    facts: aiScripts.structuredFacts,
-    evidence: [
-      { name: "cedula-marta-rodriguez.pdf", kind: "ID copy" },
-      { name: "signed-statement-driver.pdf", kind: "Driver statement" },
-    ],
+    facts: [...aiScripts.structuredFacts],
+    evidence: HERO_EVIDENCE,
   }),
   request: fillTemplate(aiScripts.requestTemplate, {
     citizen_name: citizen.name,
@@ -382,11 +407,17 @@ export const heroChallenge: ChallengeCase = {
 export const challenges: ChallengeCase[] = [
   heroChallenge,
   legalRapido("C-1043", "F-3101", "2026-11-13"),
-  legalRapido("C-1044", "F-3102", "2026-11-16"),
+  legalRapido("C-1044", "F-3102", "2026-11-16", {
+    poaExpires: "2026-10-31",
+    status: "Needs correction",
+    messageValues: {
+      what: "a valid power of attorney (the one sent expired on 31 Oct 2026)",
+      date: "03 Dec 2026",
+      dateIso: "2026-12-03",
+    },
+  }),
   legalRapido("C-1045", "F-3103", "2026-11-17"),
-  legalRapido("C-1046", "F-3104", "2026-11-18", [
-    { name: "photo-camera-without-signage.jpg", kind: "Photo" },
-  ]),
+  legalRapido("C-1046", "F-3104", "2026-11-18", { extraEvidence: [EXPIRED_CALIBRATION] }),
   legalRapido("C-1047", "F-3105", "2026-11-19"),
   challenge({
     id: "C-1048",
@@ -397,7 +428,7 @@ export const challenges: ChallengeCase[] = [
       "The notice arrived at my home on 6 November, almost a month after the event.",
       "I could not challenge it in time because I did not know about it.",
     ],
-    evidence: [{ name: "envelope-postmark.jpg", kind: "Photo" }],
+    evidence: [ENVELOPE_PHOTO],
   }),
   challenge({
     id: "C-1049",
@@ -405,6 +436,7 @@ export const challenges: ChallengeCase[] = [
     reason: "Other",
     submittedOn: "2026-11-10",
     facts: ["The traffic light at that junction was not working that afternoon."],
+    evidence: [EDITED_PHOTO],
   }),
   challenge({
     id: "C-1050",
@@ -438,7 +470,7 @@ export const challenges: ChallengeCase[] = [
     reason: "Vehicle sold before the fine",
     submittedOn: "2026-11-20",
     facts: ["I sold the car on 2 October 2026. The buyer has not completed the transfer in RUNT."],
-    evidence: [{ name: "sale-contract.pdf", kind: "Bill of sale" }],
+    evidence: [BILL_OF_SALE],
     status: "Hearing scheduled",
     messageValues: {
       date: "02 Dec 2026",

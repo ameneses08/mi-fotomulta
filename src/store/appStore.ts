@@ -50,6 +50,7 @@ import type {
   ChallengeCase,
   Citizen,
   DecisionKind,
+  EvidenceItem,
   FindingReview,
   Fine,
   LegalAct,
@@ -106,6 +107,8 @@ interface Actions {
   setPastedText: (value: string) => void;
   structureClaim: () => void;
   addEvidence: (fileNames: string[]) => void;
+  /** Adds prepared documents (with AI-extracted fields), e.g. the demo sample documents. */
+  addEvidenceItems: (items: EvidenceItem[]) => void;
   removeEvidence: (name: string) => void;
   setRequest: (value: string) => void;
   nextStep: () => void;
@@ -250,6 +253,12 @@ export const useAppStore = create<AppState>()(
             .filter((name) => !known.has(name))
             .map((name) => ({ name, kind: guessEvidenceKind(name) }));
           updateDraft({ evidence: [...get().draft.evidence, ...added] });
+        },
+        addEvidenceItems: (items) => {
+          const known = new Set(get().draft.evidence.map((e) => e.name));
+          updateDraft({
+            evidence: [...get().draft.evidence, ...items.filter((i) => !known.has(i.name))],
+          });
         },
         removeEvidence: (name) =>
           updateDraft({ evidence: get().draft.evidence.filter((e) => e.name !== name) }),

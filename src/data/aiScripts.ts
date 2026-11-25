@@ -27,7 +27,7 @@ export interface CaseBrief {
 }
 
 const structuredFacts = [
-  "On 12 November 2026 my brother, Julián Rodríguez Peña, was using my vehicle on Av. Boyacá con Calle 80. I was not driving.",
+  "On 12 November 2026 my brother, Andrés Rodríguez Peña, was using my vehicle on Av. Boyacá con Calle 80. I was not driving.",
   "I know because he borrowed the car that day to go to work. He has signed a statement confirming that he was driving.",
   "Please check who was driving using the evidence, instead of assuming that I was driving because I am the registered owner.",
 ];

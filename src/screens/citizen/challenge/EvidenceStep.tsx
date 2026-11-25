@@ -2,12 +2,13 @@ import { FilePlus2, FileText, Trash2, Upload } from "lucide-react";
 import { AIPanel } from "@/components/AIPanel";
 import { Button } from "@/components/ui/button";
 import { aiScripts } from "@/data/aiScripts";
-import { SAMPLE_EVIDENCE_FILES } from "@/data/mockData";
+import { SAMPLE_EVIDENCE } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
 
 export function EvidenceStep() {
   const evidence = useAppStore((s) => s.draft.evidence);
   const addEvidence = useAppStore((s) => s.addEvidence);
+  const addEvidenceItems = useAppStore((s) => s.addEvidenceItems);
   const removeEvidence = useAppStore((s) => s.removeEvidence);
 
   return (
@@ -31,7 +32,7 @@ export function EvidenceStep() {
       <Button
         variant="outline"
         className="mt-3 w-full"
-        onClick={() => addEvidence(SAMPLE_EVIDENCE_FILES)}
+        onClick={() => addEvidenceItems(SAMPLE_EVIDENCE)}
       >
         <FilePlus2 size={18} aria-hidden="true" />
         Use sample documents
