@@ -16,6 +16,7 @@ import { Route as StaffRouteImport } from './routes/staff'
 import { Route as CitizenHelpRouteImport } from './routes/citizen_.help'
 import { Route as StaffBulkRevocationRouteImport } from './routes/staff_.bulk-revocation'
 import { Route as StaffCamerasRouteImport } from './routes/staff_.cameras'
+import { Route as StaffRefundsRouteImport } from './routes/staff_.refunds'
 import { Route as CitizenCasesIndexRouteImport } from './routes/citizen_.cases.index'
 import { Route as CitizenCasesIdRouteImport } from './routes/citizen_.cases.$id'
 import { Route as CitizenFinesIdRouteImport } from './routes/citizen_.fines.$id'
@@ -57,6 +58,11 @@ const StaffBulkRevocationRoute = StaffBulkRevocationRouteImport.update({
 const StaffCamerasRoute = StaffCamerasRouteImport.update({
   id: '/staff_/cameras',
   path: '/staff/cameras',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRefundsRoute = StaffRefundsRouteImport.update({
+  id: '/staff_/refunds',
+  path: '/staff/refunds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitizenCasesIndexRoute = CitizenCasesIndexRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/citizen/help': typeof CitizenHelpRoute
   '/staff/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff/cameras': typeof StaffCamerasRoute
+  '/staff/refunds': typeof StaffRefundsRoute
   '/citizen/cases/$id': typeof CitizenCasesIdRoute
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
   '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/citizen/help': typeof CitizenHelpRoute
   '/staff/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff/cameras': typeof StaffCamerasRoute
+  '/staff/refunds': typeof StaffRefundsRoute
   '/citizen/cases/$id': typeof CitizenCasesIdRoute
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
   '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/citizen_/help': typeof CitizenHelpRoute
   '/staff_/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff_/cameras': typeof StaffCamerasRoute
+  '/staff_/refunds': typeof StaffRefundsRoute
   '/citizen_/cases/$id': typeof CitizenCasesIdRoute
   '/citizen_/fines/$id': typeof CitizenFinesIdRoute
   '/citizen_/refunds/$id': typeof CitizenRefundsIdRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/citizen/help'
     | '/staff/bulk-revocation'
     | '/staff/cameras'
+    | '/staff/refunds'
     | '/citizen/cases/$id'
     | '/citizen/fines/$id'
     | '/citizen/refunds/$id'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/citizen/help'
     | '/staff/bulk-revocation'
     | '/staff/cameras'
+    | '/staff/refunds'
     | '/citizen/cases/$id'
     | '/citizen/fines/$id'
     | '/citizen/refunds/$id'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/citizen_/help'
     | '/staff_/bulk-revocation'
     | '/staff_/cameras'
+    | '/staff_/refunds'
     | '/citizen_/cases/$id'
     | '/citizen_/fines/$id'
     | '/citizen_/refunds/$id'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   CitizenHelpRoute: typeof CitizenHelpRoute
   StaffBulkRevocationRoute: typeof StaffBulkRevocationRoute
   StaffCamerasRoute: typeof StaffCamerasRoute
+  StaffRefundsRoute: typeof StaffRefundsRoute
   CitizenCasesIdRoute: typeof CitizenCasesIdRoute
   CitizenFinesIdRoute: typeof CitizenFinesIdRoute
   CitizenRefundsIdRoute: typeof CitizenRefundsIdRoute
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/staff/cameras'
       fullPath: '/staff/cameras'
       preLoaderRoute: typeof StaffCamerasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff_/refunds': {
+      id: '/staff_/refunds'
+      path: '/staff/refunds'
+      fullPath: '/staff/refunds'
+      preLoaderRoute: typeof StaffRefundsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/citizen_/cases/': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   CitizenHelpRoute: CitizenHelpRoute,
   StaffBulkRevocationRoute: StaffBulkRevocationRoute,
   StaffCamerasRoute: StaffCamerasRoute,
+  StaffRefundsRoute: StaffRefundsRoute,
   CitizenCasesIdRoute: CitizenCasesIdRoute,
   CitizenFinesIdRoute: CitizenFinesIdRoute,
   CitizenRefundsIdRoute: CitizenRefundsIdRoute,

@@ -17,7 +17,7 @@ import type {
 
 export const RULES_CONFIG = {
   /** R12: refunds above this amount always need a human approval. */
-  refundHumanThreshold: 2_000_000,
+  refundHumanThreshold: 1_000_000,
 } as const;
 
 export interface RulesContext {

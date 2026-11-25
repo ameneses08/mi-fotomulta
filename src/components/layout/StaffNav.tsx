@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Cctv, Inbox, Landmark, type LucideIcon } from "lucide-react";
+import { Cctv, Inbox, Landmark, Wallet, type LucideIcon } from "lucide-react";
 
 export type StaffSection = "inbox" | "refunds" | "cameras" | "bulk" | "audit";
 
@@ -7,11 +7,12 @@ interface NavItem {
   section: StaffSection;
   label: string;
   icon: LucideIcon;
-  to: "/staff" | "/staff/cameras" | "/staff/bulk-revocation";
+  to: "/staff" | "/staff/refunds" | "/staff/cameras" | "/staff/bulk-revocation";
 }
 
 const NAV: NavItem[] = [
   { section: "inbox", label: "Inbox", icon: Inbox, to: "/staff" },
+  { section: "refunds", label: "Refunds", icon: Wallet, to: "/staff/refunds" },
   { section: "cameras", label: "Cameras", icon: Cctv, to: "/staff/cameras" },
   { section: "bulk", label: "Bulk revocation", icon: Landmark, to: "/staff/bulk-revocation" },
 ];

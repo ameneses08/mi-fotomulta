@@ -47,9 +47,9 @@ describe("mock data", () => {
     expect(fine && deriveRefundEligibility(fine, ctx)).toBe(heroRefund()?.status);
   });
 
-  it("has 12 challenges and 6 refunds for the staff queue", () => {
+  it("has 12 challenges and 10 refunds for the staff queues", () => {
     expect(store().challenges).toHaveLength(12);
-    expect(store().refunds).toHaveLength(6);
+    expect(store().refunds).toHaveLength(10);
     expect(
       store().challenges.filter((c) => c.representative === "LegalRápido S.A.S."),
     ).toHaveLength(5);

@@ -18,7 +18,7 @@ import { aiScripts } from "./aiScripts";
 export const DEMO_TODAY = "2026-11-25";
 
 /** Version of this seed. Saved demos from another version are discarded on load. */
-export const DEMO_DATA_VERSION = 3;
+export const DEMO_DATA_VERSION = 4;
 
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
@@ -247,6 +247,29 @@ export const fines: Fine[] = [
     dates: ["2026-06-05", "2026-06-08"],
     paidOn: "2026-06-11",
   }),
+  fine({
+    id: "F-3206",
+    owner: ["Gloria Inés Parra", "41.660.902", "TYU447"],
+    cameraId: "CAM-SUB100",
+    dates: ["2026-06-22", "2026-06-23"],
+    amount: 1250000,
+    offence: "Exceeding the speed limit by more than 30 km/h",
+    paidOn: "2026-06-30",
+  }),
+  fine({
+    id: "F-3207",
+    owner: ["Julio César Rincón", "79.300.118", "BNM662"],
+    cameraId: "CAM-SUB100",
+    dates: ["2026-07-06", "2026-07-07"],
+    paidOn: "2026-07-14",
+  }),
+  fine({
+    id: "F-3208",
+    owner: ["Martha Lucía Vega", "52.118.774", "CVB903"],
+    cameraId: "CAM-SUB100",
+    dates: ["2026-07-09", "2026-07-10"],
+    paidOn: "2026-07-15",
+  }),
 ];
 
 export const legalActs: LegalAct[] = [
@@ -432,6 +455,8 @@ interface RefundSeed {
   requestedOn: string;
   status: RefundCase["status"];
   bankHolder?: [name: string, document: string];
+  /** Bank and last four digits. Defaults to a unique Bancolombia account per refund. */
+  account?: [bank: string, last4: string];
   messageValues?: RefundCase["messageValues"];
 }
 
@@ -440,6 +465,7 @@ function refund(seed: RefundSeed): RefundCase {
   const claimantName = paidFine?.ownerName ?? "";
   const claimantDocument = paidFine?.ownerDocument ?? "";
   const [holderName, holderDocument] = seed.bankHolder ?? [claimantName, claimantDocument];
+  const [bank, last4] = seed.account ?? ["Bancolombia", seed.id.slice(-4)];
   return {
     kind: "refund",
     id: seed.id,
@@ -454,9 +480,9 @@ function refund(seed: RefundSeed): RefundCase {
       ? {}
       : {
           bankAccount: {
-            bank: "Bancolombia",
+            bank,
             type: "Savings",
-            last4: "4821",
+            last4,
             holderName,
             holderDocument,
           },
@@ -468,6 +494,9 @@ function refund(seed: RefundSeed): RefundCase {
   };
 }
 
+/** Shared by three refunds from different claimants: a fraud flag in the refund queue. */
+const SHARED_ACCOUNT: [string, string] = ["Davivienda", "7730"];
+
 export const refunds: RefundCase[] = [
   refund({ id: HERO_REFUND_ID, fineId: "F-2044", requestedOn: "2026-11-10", status: "On hold" }),
   refund({ id: "R-1045", fineId: "F-3201", requestedOn: "2026-11-04", status: "On hold" }),
@@ -475,7 +504,8 @@ export const refunds: RefundCase[] = [
     id: "R-1046",
     fineId: "F-3202",
     requestedOn: "2026-11-19",
-    status: "Verifying payment details",
+    status: "Approved",
+    messageValues: { amount: "COP 650,000", date: "28 Nov 2026" },
   }),
   refund({
     id: "R-1047",
@@ -483,6 +513,7 @@ export const refunds: RefundCase[] = [
     requestedOn: "2026-11-18",
     status: "Verifying payment details",
     bankHolder: ["Inversiones Lozano Ltda.", "900.441.276-3"],
+    account: SHARED_ACCOUNT,
   }),
   refund({
     id: "R-1048",
@@ -496,7 +527,33 @@ export const refunds: RefundCase[] = [
     fineId: "F-3205",
     requestedOn: "2026-10-27",
     status: "Paid",
-    messageValues: { amount: "COP 650,000", date: "10 Nov 2026", last4: "4821" },
+    messageValues: { amount: "COP 650,000", date: "10 Nov 2026", last4: "1049" },
+  }),
+  refund({
+    id: "R-1050",
+    fineId: "F-3206",
+    requestedOn: "2026-11-20",
+    status: "Verifying payment details",
+  }),
+  refund({
+    id: "R-1051",
+    fineId: "F-3205",
+    requestedOn: "2026-11-21",
+    status: "Verifying payment details",
+  }),
+  refund({
+    id: "R-1052",
+    fineId: "F-3207",
+    requestedOn: "2026-11-23",
+    status: "Verifying payment details",
+    account: SHARED_ACCOUNT,
+  }),
+  refund({
+    id: "R-1053",
+    fineId: "F-3208",
+    requestedOn: "2026-11-24",
+    status: "Verifying payment details",
+    account: SHARED_ACCOUNT,
   }),
 ];
 
