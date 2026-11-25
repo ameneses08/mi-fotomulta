@@ -118,3 +118,10 @@ export const FINE_NEXT_ACTIONS: Record<FineStatus, string> = {
   "Refund on hold": "View my refund",
   "Another authority": "How to contact Soacha",
 };
+
+/** Notification sent to each citizen when a bulk-revocation act is applied to their fine. */
+export const REVOCATION_NOTICES = {
+  unpaid:
+    "Your fine {fine_id} of {amount} has been revoked by {act_number}: camera {camera} was not authorised on {date}. You do not need to pay it.",
+  paid: "Your fine {fine_id} of {amount} has been revoked by {act_number}: camera {camera} was not authorised on {date}. You already paid it, so your refund is ready: confirm a bank account in your name in Mi Fotomulta Clara.",
+};

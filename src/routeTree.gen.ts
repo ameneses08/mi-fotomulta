@@ -14,8 +14,8 @@ import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as CitizenHelpRouteImport } from './routes/citizen_.help'
+import { Route as StaffBulkRevocationRouteImport } from './routes/staff_.bulk-revocation'
 import { Route as StaffCamerasRouteImport } from './routes/staff_.cameras'
-import { Route as StaffLegalActsRouteImport } from './routes/staff_.legal-acts'
 import { Route as CitizenCasesIndexRouteImport } from './routes/citizen_.cases.index'
 import { Route as CitizenCasesIdRouteImport } from './routes/citizen_.cases.$id'
 import { Route as CitizenFinesIdRouteImport } from './routes/citizen_.fines.$id'
@@ -49,14 +49,14 @@ const CitizenHelpRoute = CitizenHelpRouteImport.update({
   path: '/citizen/help',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffBulkRevocationRoute = StaffBulkRevocationRouteImport.update({
+  id: '/staff_/bulk-revocation',
+  path: '/staff/bulk-revocation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaffCamerasRoute = StaffCamerasRouteImport.update({
   id: '/staff_/cameras',
   path: '/staff/cameras',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StaffLegalActsRoute = StaffLegalActsRouteImport.update({
-  id: '/staff_/legal-acts',
-  path: '/staff/legal-acts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitizenCasesIndexRoute = CitizenCasesIndexRouteImport.update({
@@ -101,8 +101,8 @@ export interface FileRoutesByFullPath {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen/help': typeof CitizenHelpRoute
+  '/staff/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff/cameras': typeof StaffCamerasRoute
-  '/staff/legal-acts': typeof StaffLegalActsRoute
   '/citizen/cases/$id': typeof CitizenCasesIdRoute
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
   '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
@@ -117,8 +117,8 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen/help': typeof CitizenHelpRoute
+  '/staff/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff/cameras': typeof StaffCamerasRoute
-  '/staff/legal-acts': typeof StaffLegalActsRoute
   '/citizen/cases/$id': typeof CitizenCasesIdRoute
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
   '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
@@ -134,8 +134,8 @@ export interface FileRoutesById {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen_/help': typeof CitizenHelpRoute
+  '/staff_/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff_/cameras': typeof StaffCamerasRoute
-  '/staff_/legal-acts': typeof StaffLegalActsRoute
   '/citizen_/cases/$id': typeof CitizenCasesIdRoute
   '/citizen_/fines/$id': typeof CitizenFinesIdRoute
   '/citizen_/refunds/$id': typeof CitizenRefundsIdRoute
@@ -152,8 +152,8 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen/help'
+    | '/staff/bulk-revocation'
     | '/staff/cameras'
-    | '/staff/legal-acts'
     | '/citizen/cases/$id'
     | '/citizen/fines/$id'
     | '/citizen/refunds/$id'
@@ -168,8 +168,8 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen/help'
+    | '/staff/bulk-revocation'
     | '/staff/cameras'
-    | '/staff/legal-acts'
     | '/citizen/cases/$id'
     | '/citizen/fines/$id'
     | '/citizen/refunds/$id'
@@ -184,8 +184,8 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen_/help'
+    | '/staff_/bulk-revocation'
     | '/staff_/cameras'
-    | '/staff_/legal-acts'
     | '/citizen_/cases/$id'
     | '/citizen_/fines/$id'
     | '/citizen_/refunds/$id'
@@ -201,8 +201,8 @@ export interface RootRouteChildren {
   DemoRoute: typeof DemoRoute
   StaffRoute: typeof StaffRoute
   CitizenHelpRoute: typeof CitizenHelpRoute
+  StaffBulkRevocationRoute: typeof StaffBulkRevocationRoute
   StaffCamerasRoute: typeof StaffCamerasRoute
-  StaffLegalActsRoute: typeof StaffLegalActsRoute
   CitizenCasesIdRoute: typeof CitizenCasesIdRoute
   CitizenFinesIdRoute: typeof CitizenFinesIdRoute
   CitizenRefundsIdRoute: typeof CitizenRefundsIdRoute
@@ -249,18 +249,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitizenHelpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff_/bulk-revocation': {
+      id: '/staff_/bulk-revocation'
+      path: '/staff/bulk-revocation'
+      fullPath: '/staff/bulk-revocation'
+      preLoaderRoute: typeof StaffBulkRevocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/staff_/cameras': {
       id: '/staff_/cameras'
       path: '/staff/cameras'
       fullPath: '/staff/cameras'
       preLoaderRoute: typeof StaffCamerasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/staff_/legal-acts': {
-      id: '/staff_/legal-acts'
-      path: '/staff/legal-acts'
-      fullPath: '/staff/legal-acts'
-      preLoaderRoute: typeof StaffLegalActsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/citizen_/cases/': {
@@ -321,8 +321,8 @@ const rootRouteChildren: RootRouteChildren = {
   DemoRoute: DemoRoute,
   StaffRoute: StaffRoute,
   CitizenHelpRoute: CitizenHelpRoute,
+  StaffBulkRevocationRoute: StaffBulkRevocationRoute,
   StaffCamerasRoute: StaffCamerasRoute,
-  StaffLegalActsRoute: StaffLegalActsRoute,
   CitizenCasesIdRoute: CitizenCasesIdRoute,
   CitizenFinesIdRoute: CitizenFinesIdRoute,
   CitizenRefundsIdRoute: CitizenRefundsIdRoute,

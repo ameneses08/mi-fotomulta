@@ -1,6 +1,7 @@
 import { deriveFineStatus, isFineOnNonCompliantCamera, isOtherAuthority } from "@/lib/rules";
 import type { RulesContext } from "@/lib/rules";
-import { formatCOP } from "@/lib/format";
+import { REVOCATION_NOTICES } from "@/data/statusMessages";
+import { fillTemplate, formatCOP, formatDate } from "@/lib/format";
 import { changeStatus, createAuditEntry } from "@/lib/transitions";
 import type { AuditEntry, Fine, IsoTimestamp, LegalAct, RefundCase } from "@/types";
 
@@ -97,4 +98,29 @@ export function registerAct(
   }
   const refunds = ctx.refunds.map((refund) => released.get(refund.id) ?? refund);
   return { ok: true, act: signedAct, refunds, audit, preview };
+}
+
+/** Every SDM fine the act covers (non-compliant camera on the infraction date), revoked or not. */
+export function finesCoveredByAct(act: LegalAct, ctx: RulesContext): Fine[] {
+  return ctx.fines.filter(
+    (fine) =>
+      act.cameraIds.includes(fine.cameraId) &&
+      !isOtherAuthority(fine) &&
+      isFineOnNonCompliantCamera(fine, ctx),
+  );
+}
+
+export function totalAmount(fines: readonly Fine[]): number {
+  return fines.reduce((sum, fine) => sum + fine.amount, 0);
+}
+
+/** The exact notification each citizen receives when the act is applied to their fine. */
+export function revocationNotice(fine: Fine, act: LegalAct): string {
+  return fillTemplate(fine.paidOn ? REVOCATION_NOTICES.paid : REVOCATION_NOTICES.unpaid, {
+    fine_id: fine.id,
+    amount: formatCOP(fine.amount),
+    act_number: act.number,
+    camera: fine.cameraId,
+    date: formatDate(fine.infractionDate),
+  });
 }

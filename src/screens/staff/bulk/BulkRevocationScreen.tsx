@@ -1,31 +1,37 @@
 import { CheckCircle2, FileText, Undo2 } from "lucide-react";
 import { useMemo } from "react";
 import { StaffLayout } from "@/components/layout/StaffLayout";
+import { LevelBadge } from "@/components/LevelBadge";
 import { Notice } from "@/components/Notice";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { BULK_ACT_ID } from "@/data/mockData";
 import { formatCOP, formatTimestamp } from "@/lib/format";
-import { previewAct } from "@/lib/revocation";
+import { finesCoveredByAct, previewAct, totalAmount } from "@/lib/revocation";
 import { useAppStore } from "@/store/appStore";
 import { useRulesContext } from "@/store/selectors";
+import { CoveredFinesTable } from "./CoveredFinesTable";
+import { NotificationPreview } from "./NotificationPreview";
 import { RegisterActDialog } from "./RegisterActDialog";
 import { ScenarioBanner } from "./ScenarioBanner";
 
-export function LegalActsScreen() {
+export function BulkRevocationScreen() {
   const ctx = useRulesContext();
   const revert = useAppStore((s) => s.revertLegalAct);
   const canRevert = useAppStore((s) => s.actSnapshot !== null);
   const act = ctx.legalActs.find((a) => a.id === BULK_ACT_ID);
   const preview = useMemo(() => (act ? previewAct(act, ctx) : undefined), [act, ctx]);
+  const covered = useMemo(() => (act ? finesCoveredByAct(act, ctx) : []), [act, ctx]);
   const others = ctx.legalActs.filter((a) => a.id !== BULK_ACT_ID);
   if (!act || !preview) return null;
 
   return (
     <StaffLayout active="bulk">
-      <div className="eyebrow">Inspector workspace</div>
-      <h1 className="page-title mt-3">Legal acts</h1>
-      <p className="page-subtitle">Acts that change many fines at once. Fictional documents.</p>
+      <h1 className="page-title">Bulk revocation</h1>
+      <p className="page-subtitle">
+        Revocation runs only while the legal act is in force. The official signs once on the rule;
+        the system applies it to each fine.
+      </p>
       <ScenarioBanner act={act} />
       <article className="panel mt-6" aria-labelledby="act-title">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -47,10 +53,14 @@ export function LegalActsScreen() {
         {act.status === "Draft" ? (
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t pt-5">
             <p className="text-sm">
-              Applies to <strong>{preview.affectedFines.length} fines</strong> · refunds released:{" "}
+              Applies to <strong>{preview.affectedFines.length} fines</strong> (
+              {formatCOP(totalAmount(preview.affectedFines))}) · refunds released:{" "}
               <strong>{formatCOP(preview.totalRefund)}</strong>
             </p>
-            <RegisterActDialog act={act} preview={preview} />
+            <div className="flex items-center gap-3">
+              <LevelBadge level="H" />
+              <RegisterActDialog act={act} preview={preview} />
+            </div>
           </div>
         ) : (
           <div className="mt-5 border-t pt-5">
@@ -68,6 +78,11 @@ export function LegalActsScreen() {
           </div>
         )}
       </article>
+      <h2 className="mt-8 text-lg font-semibold">
+        Fines from the irregular cameras · {covered.length} · {formatCOP(totalAmount(covered))}
+      </h2>
+      <CoveredFinesTable fines={covered} ctx={ctx} />
+      <NotificationPreview fines={covered} act={act} />
       <h2 className="mt-10 text-lg font-semibold">Earlier acts</h2>
       {others.map((other) => (
         <article

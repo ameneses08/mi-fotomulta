@@ -7,13 +7,13 @@ interface NavItem {
   section: StaffSection;
   label: string;
   icon: LucideIcon;
-  to: "/staff" | "/staff/cameras" | "/staff/legal-acts";
+  to: "/staff" | "/staff/cameras" | "/staff/bulk-revocation";
 }
 
 const NAV: NavItem[] = [
   { section: "inbox", label: "Inbox", icon: Inbox, to: "/staff" },
   { section: "cameras", label: "Cameras", icon: Cctv, to: "/staff/cameras" },
-  { section: "bulk", label: "Bulk revocation", icon: Landmark, to: "/staff/legal-acts" },
+  { section: "bulk", label: "Bulk revocation", icon: Landmark, to: "/staff/bulk-revocation" },
 ];
 
 export function StaffNav({ active }: { active: StaffSection }) {

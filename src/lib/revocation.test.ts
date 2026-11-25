@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { deriveFineStatus } from "@/lib/rules";
-import { previewAct, registerAct } from "@/lib/revocation";
+import {
+  finesCoveredByAct,
+  previewAct,
+  registerAct,
+  revocationNotice,
+  totalAmount,
+} from "@/lib/revocation";
 import {
   makeAct,
   makeChallenge,
@@ -78,5 +84,21 @@ describe("registerAct", () => {
   it("requires the official's name and refuses an act already in force", () => {
     expect(registerAct(makeAct(), ctx, "  ", timestamp).ok).toBe(false);
     expect(registerAct(makeAct({ status: "In force" }), ctx, "Laura", timestamp).ok).toBe(false);
+  });
+});
+
+describe("finesCoveredByAct and notices", () => {
+  it("still lists covered fines after the act is applied", () => {
+    const result = registerAct(makeAct(), ctx, "Laura Gómez", timestamp);
+    if (!result.ok) throw new Error(result.error);
+    const after = { ...ctx, legalActs: [result.act], refunds: result.refunds };
+    expect(finesCoveredByAct(result.act, after).map((f) => f.id)).toEqual(["F-B1", "F-B2"]);
+    expect(totalAmount(finesCoveredByAct(result.act, after))).toBe(1300000);
+  });
+
+  it("previews a different notice for unpaid and paid fines", () => {
+    expect(revocationNotice(unpaidBad, makeAct())).toContain("You do not need to pay it.");
+    expect(revocationNotice(paidBad, makeAct())).toContain("your refund is ready");
+    expect(revocationNotice(paidBad, makeAct())).toContain("Resolution 1");
   });
 });
