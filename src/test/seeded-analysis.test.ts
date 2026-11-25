@@ -31,8 +31,9 @@ describe("seeded evidence produces the scripted findings", () => {
     expect(finding("C-1042", "R7")?.why).toContain("Andrés Rodríguez Peña");
   });
 
-  it("C-1048: notice sent 6 working days after the infraction (R5)", () => {
-    expect(finding("C-1048", "R5")?.why).toContain("6 working days");
+  it("C-1048: notice sent 6 working days after validation (R5, Ley 1843 de 2017 art. 8)", () => {
+    expect(finding("C-1048", "R5")).toMatchObject({ result: "Flag", level: "H" });
+    expect(finding("C-1048", "R5")?.why).toContain("6 working days after validation");
   });
 
   it("C-1053: sold before the infraction, RUNT owner unchanged (R8)", () => {

@@ -4,7 +4,10 @@ import { addWorkingDays, SLA_CONFIG, workingDaysBetween } from "@/lib/sla";
 import type { AnalysisFinding, ChallengeCase, Fine } from "@/types";
 import { makeFinding, type AnalysisContext } from "./finding";
 
-/** R1 (11-working-day filing window) and R5 (3-working-day notification window). */
+/**
+ * R1: 11-working-day filing window from notification.
+ * R5: notice within 3 working days of the infraction's validation (Ley 1843 de 2017, art. 8).
+ */
 export function dateFindings(
   challenge: ChallengeCase,
   fine: Fine,
@@ -12,13 +15,14 @@ export function dateFindings(
 ): AnalysisFinding[] {
   const deadline = addWorkingDays(fine.notificationDate, SLA_CONFIG.challengeWindowDays);
   const onTime = challenge.submittedOn <= deadline;
-  const days = workingDaysBetween(fine.infractionDate, fine.notificationDate);
+  const days = workingDaysBetween(fine.validationDate, fine.notificationDate);
   const notifiedInTime = days <= SLA_CONFIG.notificationWindowDays;
   const values = {
     notified: formatDate(fine.notificationDate),
     deadline: formatDate(deadline),
     filed: formatDate(challenge.submittedOn),
     days: String(days),
+    validated: formatDate(fine.validationDate),
     limit: String(SLA_CONFIG.notificationWindowDays),
   };
   return [
@@ -44,7 +48,7 @@ export function dateFindings(
         category: "Dates",
         check: T.checks.notification,
         result: notifiedInTime ? "Pass" : "Flag",
-        evidence: "From: SIMIT infraction and notification dates",
+        evidence: "From: SIMIT validation and notification dates",
         confidence: "High",
         level: notifiedInTime ? "A" : "H",
         ruleId: "R5",

@@ -60,6 +60,7 @@ export function ClaimColumn({ challenge }: { challenge: ChallengeCase }) {
               value={`${formatDate(fine.infractionDate)} · ${fine.location}`}
               source="SIMIT"
             />
+            <DataRow label="Validated" value={formatDate(fine.validationDate)} source="SIMIT" />
             <DataRow label="Notified" value={formatDate(fine.notificationDate)} source="SIMIT" />
             <DataRow
               label="Plate (RUNT / image)"

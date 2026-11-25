@@ -19,6 +19,7 @@ export function makeFine(overrides: Partial<Fine> = {}): Fine {
     plate: "AAA111",
     imagePlate: "AAA111",
     infractionDate: "2026-11-02",
+    validationDate: "2026-11-02",
     notificationDate: "2026-11-04",
     location: "Test avenue",
     offence: "Speeding",

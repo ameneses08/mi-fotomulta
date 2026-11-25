@@ -28,7 +28,7 @@ import {
 export const DEMO_TODAY = "2026-11-25";
 
 /** Version of this seed. Saved demos from another version are discarded on load. */
-export const DEMO_DATA_VERSION = 8;
+export const DEMO_DATA_VERSION = 9;
 
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
@@ -91,6 +91,8 @@ interface FineSeed {
   owner: [name: string, document: string, plate: string];
   cameraId: string;
   dates: [infraction: string, notification: string];
+  /** Validation date; defaults to the infraction date (validated the same day). */
+  validated?: string;
   amount?: number;
   offence?: string;
   paidOn?: string;
@@ -109,6 +111,7 @@ function fine(seed: FineSeed): Fine {
     plate,
     imagePlate: seed.imagePlate ?? plate,
     infractionDate: seed.dates[0],
+    validationDate: seed.validated ?? seed.dates[0],
     notificationDate: seed.dates[1],
     location: camera?.location ?? "",
     offence: seed.offence ?? "Exceeding the posted speed limit",
@@ -193,7 +196,9 @@ export const fines: Fine[] = [
     id: "F-3106",
     owner: ["Sandra Milena Rojas", "51.902.443", "TRK550"],
     cameraId: "CAM-68-13",
-    dates: ["2026-10-09", "2026-10-19"],
+    // Validated two days after the infraction; notified 6 working days after validation (R5).
+    dates: ["2026-10-07", "2026-10-19"],
+    validated: "2026-10-09",
   }),
   fine({
     id: "F-3107",

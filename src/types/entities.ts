@@ -31,6 +31,8 @@ export interface Fine {
   /** Plate read from the camera image. Differs from `plate` in a mismatch case. */
   imagePlate: string;
   infractionDate: IsoDate;
+  /** When the authority validated the infraction. The notice window (R5) starts here. */
+  validationDate: IsoDate;
   notificationDate: IsoDate;
   location: string;
   offence: string;

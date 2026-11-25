@@ -7,7 +7,7 @@ import type { ChallengeCase, ClockRisk, IsoDate } from "@/types";
 export const SLA_CONFIG = {
   /** R1: a challenge must be filed within 11 working days of notification. */
   challengeWindowDays: 11,
-  /** R5: notification must be sent within 3 working days of the infraction. */
+  /** R5: notice within 3 working days of the infraction's validation (Ley 1843 de 2017, art. 8). */
   notificationWindowDays: 3,
   validationDays: 2,
   decisionDays: 10,

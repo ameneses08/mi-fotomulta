@@ -171,7 +171,9 @@ Rules (R1–R12)
   No check closes a case or removes the right to challenge.
 - Only applicable rules are listed: R7 for "I wasn't driving", R8 for "Vehicle sold", R10 only
   for fines on non-compliant cameras, R2 is applied at fine level (no case is created).
-- R5 notification window: 3 working days after the infraction (assumption).
+- R5 notice window: 3 working days after the **validation** of the infraction (Ley 1843 de
+  2017, art. 8). Fines carry a `validationDate` (seed default: the infraction date; C-1048 was
+  validated on 9 Oct 2026 and notified 6 working days later).
 - R9: represented cases are flagged as templated unless they add evidence beyond the power of
   attorney ("New evidence"); grouping saves reading time, never replaces individual review.
 - R12: human approval above **COP 1,000,000** (`RULES_CONFIG.refundHumanThreshold`, assumption

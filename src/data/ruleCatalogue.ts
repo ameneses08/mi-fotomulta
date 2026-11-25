@@ -11,7 +11,7 @@ export const RULES: Record<RuleId, RuleDefinition> = {
   R2: { title: "Fine issued by SDM, not another authority", level: "A" },
   R3: { title: "No duplicate case on the same fine", level: "A" },
   R4: { title: "Camera authorised on the infraction date", level: "A" },
-  R5: { title: "Notification sent within the legal window", level: "A" },
+  R5: { title: "Notice sent within 3 working days of validation", level: "A" },
   R6: { title: "Plate in the image matches RUNT", level: "S" },
   R7: { title: "Driver identified by the authority (C-038/2020)", level: "H" },
   R8: { title: "Vehicle sold but not transferred", level: "H" },

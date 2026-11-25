@@ -214,7 +214,7 @@ export const analysisScripts = {
   ],
   checks: {
     deadline: "Filed within 11 working days of notification",
-    notification: "Notification sent within the legal window",
+    notification: "Notice sent within 3 working days of validation",
     documentsPresent: "Required documents present",
     statementSigned: "Driver statement signed and dated",
     namesConsistent: "Names consistent across documents",
@@ -240,9 +240,9 @@ export const analysisScripts = {
     deadlineFlag:
       "Filed on {filed}, after the window closed on {deadline}. A late filing is routed to an inspector, never refused automatically.",
     notificationPass:
-      "Notice sent {days} working days after the infraction; the legal window is {limit}.",
+      "Validated on {validated}; notice sent {days} working days after validation. The legal window is {limit} working days after validation (Ley 1843 de 2017, art. 8).",
     notificationFlag:
-      "Notice sent {days} working days after the infraction; the legal window is {limit}. Possible ground for nullity – inspector decides.",
+      "Validated on {validated}; notice sent {days} working days after validation, but the legal window is {limit} working days after validation (Ley 1843 de 2017, art. 8). Possible ground for nullity – inspector decides.",
     documentsPass: "Found: {found}.",
     documentsMissing: "Missing: {missing}. The citizen can be asked for a correction.",
     documentsNone: "No supporting documents were attached.",
