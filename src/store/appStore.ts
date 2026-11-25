@@ -30,7 +30,8 @@ import {
 } from "@/lib/challenge";
 import { answerQuestion, matchIntent, type AssistantAction } from "@/lib/assistant";
 import { assignCase } from "@/lib/assignment";
-import { applyDecision } from "@/lib/decision";
+import { appealDecision, applyDecision } from "@/lib/decision";
+import { canStartChallenge } from "@/lib/fineActions";
 import {
   autoVerifyRefund,
   decideRefund,
@@ -119,6 +120,7 @@ interface Actions {
   resumeSimulations: () => void;
   askAssistant: (question: string) => void;
   assignChallenge: (caseId: string, inspector: string) => void;
+  appealChallenge: (caseId: string) => string | null;
 }
 
 export type AppState = DemoData & Actions;
@@ -258,7 +260,11 @@ export const useAppStore = create<AppState>()(
         },
         previousStep: () => updateDraft({ step: Math.max(0, get().draft.step - 1) }),
         submitChallenge: () => {
-          const { draft, citizen: owner } = get();
+          const { draft, citizen: owner, challenges: all } = get();
+          if (!canStartChallenge(draft.fineId, all)) {
+            set({ draftError: "This fine already has a challenge. Track it instead." });
+            return null;
+          }
           const caseId = caseIdForFine(draft.fineId, HERO_FINE_ID, HERO_CASE_ID);
           const result = submitDraft(draft, caseId, owner, DEMO_TODAY, demoTimestamp());
           if ("error" in result) {
@@ -375,6 +381,18 @@ export const useAppStore = create<AppState>()(
         resetDemo: (preset) => {
           cancelScheduled();
           set(initialData(preset));
+        },
+        appealChallenge: (caseId) => {
+          const { challenges: all, citizen: owner } = get();
+          const current = all.find((c) => c.id === caseId);
+          if (!current) return "Case not found.";
+          const result = appealDecision(current, owner.name, DEMO_TODAY, demoTimestamp());
+          if (!result.ok) return result.error;
+          set((s) => ({
+            challenges: replaceById(s.challenges, result.entity),
+            audit: [...s.audit, ...result.audit],
+          }));
+          return null;
         },
         assignChallenge: (caseId, inspector) => {
           const current = get().challenges.find((c) => c.id === caseId);

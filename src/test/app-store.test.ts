@@ -80,6 +80,7 @@ describe("challenge wizard", () => {
 
 describe("hero flow", () => {
   it("submits C-1042 as Received, then automatic checks move it to Validating with Laura", () => {
+    store().resetDemo("beforeChallenge");
     fillDraftToReview();
     expect(store().submitChallenge()).toBe(HERO_CASE_ID);
     expect(hero()).toMatchObject({ status: "Received", holder: "Automatic checks" });
@@ -190,6 +191,25 @@ describe("citizen assistant", () => {
   });
 });
 
+describe("one challenge per fine (R3)", () => {
+  it("refuses a second challenge while one exists", () => {
+    fillDraftToReview();
+    expect(store().submitChallenge()).toBeNull();
+    expect(store().draftError).toMatch(/already has a challenge/);
+  });
+
+  it("lets the citizen appeal after a decision", () => {
+    store().decideChallenge(HERO_CASE_ID, {
+      kind: "Uphold",
+      reason: "Evidence insufficient",
+      citizenMessage: "Dear Marta, we kept the fine.",
+      aiSuggestion: "Revoke",
+    });
+    expect(store().appealChallenge(HERO_CASE_ID)).toBeNull();
+    expect(hero()?.status).toBe("Appealed");
+  });
+});
+
 describe("reset", () => {
   it("can start before Marta's challenge so the citizen journey begins fresh", () => {
     store().resetDemo("beforeChallenge");
@@ -199,6 +219,7 @@ describe("reset", () => {
   });
 
   it("restores the seeded demo data and cancels pending simulations", () => {
+    store().resetDemo("beforeChallenge");
     fillDraftToReview();
     store().submitChallenge();
     store().resetDemo();

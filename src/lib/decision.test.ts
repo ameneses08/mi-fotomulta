@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   aiResponseFor,
+  appealDecision,
   applyDecision,
   availableDecisions,
   type DecisionInput,
@@ -108,5 +109,31 @@ describe("applyDecision", () => {
 
   it("refuses a decision the current status does not allow", () => {
     expect(applyDecision(makeChallenge({ status: "Received" }), input).ok).toBe(false);
+  });
+});
+
+describe("appealDecision", () => {
+  it("moves a decided case to Appealed with the appeal date", () => {
+    const result = appealDecision(
+      makeChallenge({ status: "Decided" }),
+      "Marta",
+      "2026-11-25",
+      input.timestamp,
+    );
+    expect(result.ok && result.entity).toMatchObject({
+      status: "Appealed",
+      messageValues: { date: "25 Nov 2026" },
+    });
+  });
+
+  it("refuses to appeal a case that is not decided", () => {
+    expect(
+      appealDecision(
+        makeChallenge({ status: "Validating" }),
+        "Marta",
+        "2026-11-25",
+        input.timestamp,
+      ).ok,
+    ).toBe(false);
   });
 });

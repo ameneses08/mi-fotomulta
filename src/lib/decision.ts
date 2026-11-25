@@ -150,3 +150,17 @@ export function applyDecision(challenge: ChallengeCase, input: DecisionInput): D
     ],
   };
 }
+
+/** The citizen appeals a decision: Decided → Appealed, through changeStatus. */
+export function appealDecision(
+  challenge: ChallengeCase,
+  citizenName: string,
+  today: IsoDate,
+  timestamp: IsoTimestamp,
+): DecisionResult {
+  const result = changeStatus(challenge, "Appealed", citizenName, "Appeal filed online", {
+    timestamp,
+    messageValues: { date: formatDate(today) },
+  });
+  return result.ok ? { ok: true, entity: result.entity, audit: [result.audit] } : result;
+}

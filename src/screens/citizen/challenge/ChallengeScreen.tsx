@@ -1,6 +1,6 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Send } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CitizenLayout } from "@/components/layout/CitizenLayout";
 import { Button } from "@/components/ui/button";
 import { formatCOP } from "@/lib/format";
@@ -20,6 +20,9 @@ export function ChallengeScreen({ id }: { id: string }) {
   const fine = useFine(id);
   const status = useFineStatus(id);
   const step = useAppStore((s) => s.draft.step);
+  const existing = useAppStore((s) => s.challenges.find((c) => c.fineId === id));
+  // Set when this screen submits, so the redirect to the tracker isn't replaced by the notice.
+  const [submittedHere, setSubmittedHere] = useState(false);
   const error = useAppStore((s) => s.draftError);
   const { startChallenge, nextStep, previousStep, submitChallenge } = useAppStore.getState();
 
@@ -28,6 +31,21 @@ export function ChallengeScreen({ id }: { id: string }) {
   }, [id, startChallenge]);
 
   if (!fine) return <NotFoundScreen label="Fine" />;
+  if (existing && !submittedHere) {
+    return (
+      <CitizenLayout back={{ to: "/citizen", label: "My fines" }}>
+        <h1 className="page-title">You already challenged this fine</h1>
+        <p className="page-subtitle">
+          Case {existing.id} is {existing.status.toLowerCase()}. Follow it instead of filing again.
+        </p>
+        <Button asChild className="mt-6">
+          <Link to="/citizen/cases/$id" params={{ id: existing.id }}>
+            Track my challenge
+          </Link>
+        </Button>
+      </CitizenLayout>
+    );
+  }
   if (fine.paidOn || status === "Another authority" || status === "Revoked") {
     return (
       <CitizenLayout back={{ to: "/citizen", label: "My fines" }}>
@@ -42,6 +60,7 @@ export function ChallengeScreen({ id }: { id: string }) {
 
   const Step = STEPS[step] ?? ReasonStep;
   const submit = () => {
+    setSubmittedHere(true);
     const caseId = submitChallenge();
     if (caseId) void navigate({ to: "/citizen/cases/$id", params: { id: caseId } });
   };
