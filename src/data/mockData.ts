@@ -531,3 +531,12 @@ export const initialAudit: AuditEntry[] = [
     `Assigned to ${INSPECTOR_LABEL}`,
   ),
 ];
+
+/** Prefilled mock sign-in values so the recording is quick. Not real credentials. */
+export const MOCK_SIGN_IN = {
+  citizenDocumentType: "CC",
+  citizenDocument: citizen.document,
+  citizenCode: "482915",
+  staffUsername: "laura.gomez",
+  staffPassword: "demo-pass-2026",
+} as const;

@@ -14,7 +14,7 @@ export function DemoScreen() {
       <div className="demo-bar">
         <Link to="/" className="back-link">
           <ArrowLeft size={17} aria-hidden="true" />
-          Home
+          Exit demo
         </Link>
         <p className="flex items-center gap-2 font-semibold">
           <Radio size={17} className="text-primary" aria-hidden="true" />

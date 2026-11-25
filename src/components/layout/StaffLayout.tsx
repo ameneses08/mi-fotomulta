@@ -38,7 +38,7 @@ export function StaffLayout({ children, active }: StaffLayoutProps) {
         </nav>
         <Link to="/" className="back-link mt-8">
           <ArrowLeft size={16} aria-hidden="true" />
-          Switch role
+          Sign out
         </Link>
       </aside>
       <main className="staff-main">{children}</main>
