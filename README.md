@@ -78,12 +78,12 @@ Before recording: open `/demo`, click **Demo controls → Reset to before Marta'
 4. **Challenge** – reason _I wasn't driving_ → Continue. Paste any sentence into "Paste text from
    your own AI assistant" → **Turn into a structured claim** → Continue. **Use sample documents**
    → Continue. Review the AI-drafted request → **Submit challenge**.
-5. **Tracker** – "Received", then after ~3 s "Being checked" by Inspector Laura Gómez with an
+5. **Tracker** – "Received", then after ~4 s "Being checked" by Inspector Laura Gómez with an
    expected date in working days.
 6. User menu → **Sign out** → **Presenter: open split-screen demo**. Left: Marta's phone
    (narrow layout, "Ask the assistant" button). Right: the case view of C-1042. Walk through the
-   AI summary (it never replaces the original filing), the flags with A/S/H levels, the camera
-   status, then **Approve suggestion** → the reason is prefilled, the citizen message is an AI
+   AI analysis (it never replaces the original filing) with its A/S/H levels, then **Approve
+   suggestion** → the reason is prefilled, the citizen message is an AI
    draft from that reason → **Approve message and send decision**. The phone updates instantly.
    Open **Audit log**: decision, "AI suggestion accepted", AI draft and approval.
 7. **Exit demo** → sign in as **SDM staff**. **Inbox**: priorities, legal clocks, flags and the
@@ -93,7 +93,9 @@ Before recording: open `/demo`, click **Demo controls → Reset to before Marta'
 9. **Bulk revocation**: Scenario B, 8 fines and their total, the notification preview → **Register
    act as in force** → type a name → **Sign and register**. Scenario A.
 10. **Refunds**: auto-approved sample, R-1050 held above COP 1,000,000, fraud flags (holder
-    mismatch, duplicate claim, one account for three claimants). Reject one with a reason.
+    mismatch, duplicate claim, one account for three claimants). On R-1047 (holder mismatch),
+    **Request documents** with a reason – while an account is being verified the status model
+    allows Approve or Needs correction, not Reject.
 11. **Audit log**: filter by actor "AI assistant", then by case C-1042.
 12. Sign out → citizen: F-2042 and F-2044 now "Revoked"; ask the assistant **When will I get my
     refund?** → "ready". Open the refund, add a fictional account, tick the separate consent →

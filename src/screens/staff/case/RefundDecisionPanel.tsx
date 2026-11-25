@@ -2,10 +2,9 @@ import { CheckCircle2, Gavel } from "lucide-react";
 import { useState } from "react";
 import { Notice } from "@/components/Notice";
 import { Button } from "@/components/ui/button";
+import { availableRefundDecisions } from "@/lib/refund";
 import { useAppStore } from "@/store/appStore";
 import type { RefundCase, RefundDecisionKind } from "@/types";
-
-const OPTIONS: RefundDecisionKind[] = ["Approve", "Request correction", "Reject"];
 
 export function RefundDecisionPanel({ refund }: { refund: RefundCase }) {
   const decide = useAppStore((s) => s.decideRefundCase);
@@ -13,7 +12,8 @@ export function RefundDecisionPanel({ refund }: { refund: RefundCase }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
 
-  if (refund.status !== "Verifying payment details") {
+  const options = availableRefundDecisions(refund.status);
+  if (refund.status !== "Verifying payment details" || !options.length) {
     return (
       <section className="staff-column decision-panel" aria-labelledby="refund-decision">
         <h2 id="refund-decision" className="column-title">
@@ -31,7 +31,7 @@ export function RefundDecisionPanel({ refund }: { refund: RefundCase }) {
       </h2>
       <fieldset>
         <legend className="text-sm font-semibold">Outcome</legend>
-        {OPTIONS.map((option) => (
+        {options.map((option) => (
           <label key={option} className="choice compact">
             <input
               type="radio"

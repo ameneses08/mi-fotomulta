@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   autoVerifyRefund,
+  availableRefundDecisions,
   decideRefund,
   bankFormFromData,
   DEMO_BANK_FORM,
@@ -131,6 +132,18 @@ describe("decideRefund and autoVerifyRefund", () => {
     expect(
       autoVerifyRefund(refund, { ...ctx, refunds: [refund] }, "2026-11-25", timestamp),
     ).toBeNull();
+  });
+});
+
+describe("availableRefundDecisions", () => {
+  it("offers only decisions the refund status model allows", () => {
+    expect(availableRefundDecisions("Verifying payment details")).toEqual([
+      "Approve",
+      "Request correction",
+    ]);
+    expect(availableRefundDecisions("On hold")).toEqual(["Reject"]);
+    expect(availableRefundDecisions("Appealed")).toEqual(["Approve", "Reject"]);
+    expect(availableRefundDecisions("Paid")).toEqual([]);
   });
 });
 

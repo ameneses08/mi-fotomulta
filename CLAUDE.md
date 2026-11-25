@@ -255,6 +255,17 @@ Iteration 3 (mock AI analyses for the administration)
   also missed the regenerated route tree, committed right after. Commits are now gated on the
   real exit code of `npm run check`.
 
+Iteration 3.1 (final polish)
+
+- **Spec conflict, resolved in favour of the status model:** iteration 2 asked for "approve,
+  reject with required reason, request documents" in the refund queue, but the iteration 1 status
+  model only allows Verifying payment details → Approved or Needs correction. Reject always
+  failed. Refund screens now offer only the decisions `availableRefundDecisions` allows (Approve,
+  Request documents while verifying); Reject remains possible where the model allows it (On hold,
+  Appealed). Changing this needs an explicit change to the status model.
+- End-to-end run of the README demo script at 1440px (25 Nov 2026): see the issues list in the
+  final iteration 3.1 notes below.
+
 Timing (`SLA_CONFIG` in `src/lib/sla.ts`)
 
 - Validation 2, decision 10, refund payment 5 (after approval), appeal 10, correction 5, hearing

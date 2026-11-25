@@ -2,7 +2,7 @@ import { MOCK_BANK_ACCOUNT } from "@/data/mockData";
 import { formatCOP, formatDate, lastFour } from "@/lib/format";
 import { analyseRefund, isOpenFlag, type AnalysisContext } from "@/lib/analysis";
 import { addWorkingDays, SLA_CONFIG } from "@/lib/sla";
-import { changeStatus } from "@/lib/transitions";
+import { changeStatus, REFUND_TRANSITIONS } from "@/lib/transitions";
 import type {
   AuditEntry,
   BankAccount,
@@ -110,6 +110,20 @@ export function submitBankDetails(
   return result.ok
     ? { ok: true, refund: result.entity, audit: [result.audit] }
     : { ok: false, errors: { account: result.error } };
+}
+
+const DECISION_TARGETS: Record<RefundDecisionKind, RefundStatus> = {
+  Approve: "Approved",
+  "Request correction": "Needs correction",
+  Reject: "Rejected",
+};
+
+/** Staff refund decisions the status model allows from this status (e.g. no Reject while verifying). */
+export function availableRefundDecisions(status: RefundStatus): RefundDecisionKind[] {
+  const allowed = REFUND_TRANSITIONS[status];
+  return (Object.keys(DECISION_TARGETS) as RefundDecisionKind[]).filter((kind) =>
+    allowed.includes(DECISION_TARGETS[kind]),
+  );
 }
 
 export function decideRefund(

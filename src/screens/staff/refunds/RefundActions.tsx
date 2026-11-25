@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { availableRefundDecisions } from "@/lib/refund";
 import { useAppStore } from "@/store/appStore";
 import type { RefundCase, RefundDecisionKind } from "@/types";
 
@@ -21,7 +22,9 @@ export function RefundActions({ refund }: { refund: RefundCase }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
 
-  if (refund.status !== "Verifying payment details") {
+  // Only the decisions the status model allows (no Reject while the account is being verified).
+  const options = availableRefundDecisions(refund.status);
+  if (refund.status !== "Verifying payment details" || !options.length) {
     return (
       <p className="text-sm text-muted-foreground">No action available while {refund.status}.</p>
     );
@@ -29,7 +32,7 @@ export function RefundActions({ refund }: { refund: RefundCase }) {
   if (!kind) {
     return (
       <div className="flex flex-wrap gap-2">
-        {(Object.keys(LABELS) as RefundDecisionKind[]).map((option) => (
+        {options.map((option) => (
           <Button
             key={option}
             size="sm"
