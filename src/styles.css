@@ -1270,6 +1270,12 @@
 .assistant-launcher > * {
   pointer-events: auto;
 }
+/* Same breakpoint as @4xl: wide containers show the assistant column instead. */
+@container (min-width: 56rem) {
+  .assistant-launcher {
+    display: none;
+  }
+}
 .assistant-fab {
   min-height: 48px;
   border-radius: 999px;
