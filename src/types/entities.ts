@@ -69,9 +69,52 @@ export type ChallengeReason =
   | "Vehicle sold before the fine"
   | "Other";
 
+export type EvidenceKind =
+  | "ID copy"
+  | "Driver statement"
+  | "Driving licence"
+  | "Bill of sale"
+  | "Power of attorney"
+  | "Calibration certificate"
+  | "Photo"
+  | "Other";
+
+/** Field names the (simulated) AI extracts from documents. */
+export type ExtractedFieldName =
+  | "Full name"
+  | "Document number"
+  | "Declarant"
+  | "Driver"
+  | "Signature"
+  | "Date signed"
+  | "Licence number"
+  | "Valid until"
+  | "Date of sale"
+  | "Seller"
+  | "Buyer"
+  | "Represented person"
+  | "Camera"
+  | "Expires";
+
+export interface ExtractedField {
+  name: ExtractedFieldName;
+  value: string;
+  page: number;
+}
+
+/** Metadata read from an image file (simulated). */
+export interface ImageMetadata {
+  capturedAt: IsoTimestamp;
+  modifiedAt?: IsoTimestamp;
+  software?: string;
+}
+
 export interface EvidenceItem {
   name: string;
-  kind: "ID copy" | "Driver statement" | "Sale contract" | "Photo" | "Other";
+  kind: EvidenceKind;
+  /** "AI-extracted" fields shown next to the document. All values are fictional. */
+  extracted?: ExtractedField[];
+  metadata?: ImageMetadata;
 }
 
 /** Values used to fill the {placeholders} of the current status message. */

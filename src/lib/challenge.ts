@@ -55,7 +55,7 @@ export function guessEvidenceKind(fileName: string): EvidenceItem["kind"] {
   const name = fileName.toLowerCase();
   if (/(cedula|c[eé]dula|id[-_ ]|identity)/.test(name)) return "ID copy";
   if (/(statement|declaraci)/.test(name)) return "Driver statement";
-  if (/(sale|contract|venta)/.test(name)) return "Sale contract";
+  if (/(sale|contract|venta)/.test(name)) return "Bill of sale";
   if (/\.(jpe?g|png)$/.test(name)) return "Photo";
   return "Other";
 }

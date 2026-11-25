@@ -163,7 +163,9 @@ function plateCheck(fine: Fine): RuleCheck {
 
 /** Evidence beyond a representative's power of attorney counts as new (R9). */
 export function hasNewEvidence(challenge: ChallengeCase): boolean {
-  return challenge.evidence.some((item) => item.kind !== "Other");
+  return challenge.evidence.some(
+    (item) => item.kind !== "Other" && item.kind !== "Power of attorney",
+  );
 }
 
 function evidenceCheck(challenge: ChallengeCase): RuleCheck {

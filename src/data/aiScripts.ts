@@ -193,3 +193,102 @@ export const assistantScripts = {
     fines: "View my fines",
   },
 } as const;
+
+/**
+ * Mock AI analysis copy. Findings are computed deterministically by src/lib/analysis/*; these
+ * templates only explain them in plain language.
+ */
+export const analysisScripts = {
+  label: "AI analysis – an inspector decides",
+  summary: "{passed} of {total} checks passed; {flags} need an inspector. {brief}",
+  refundSummary: "{passed} of {total} checks passed; {flags} need an inspector.",
+  intakeSteps: [
+    "Reading documents",
+    "Checking dates",
+    "Checking registries",
+    "Comparing with similar cases",
+    "Fraud screening",
+    "Summary ready",
+  ],
+  checks: {
+    deadline: "Filed within 11 working days of notification",
+    notification: "Notification sent within the legal window",
+    documentsPresent: "Required documents present",
+    statementSigned: "Driver statement signed and dated",
+    namesConsistent: "Names consistent across documents",
+    licenceValid: "Driver's licence valid on the infraction date",
+    driverIdentified: "Driver identified (C-038/2020)",
+    camera: "Camera authorised on the infraction date",
+    plate: "Plate in the image matches RUNT",
+    sale: "Vehicle sold but not transferred",
+    bulk: "Covered by a bulk-revocation act in force",
+    similarity: "Similarity with other filings",
+    duplicate: "No duplicate case on the same fine",
+    imageMetadata: "Photo metadata consistent with capture",
+    powerOfAttorney: "Power of attorney valid",
+    eligibility: "Refund eligibility: paid, revoked, not yet refunded",
+    threshold: "Amount within the automatic approval threshold",
+    holder: "Bank account in the claimant's name",
+    duplicateClaim: "No earlier claim on the same fine",
+    accountReuse: "Bank account not shared across claimants",
+  },
+  why: {
+    deadlinePass:
+      "Notified on {notified}; the 11-working-day window closed on {deadline}; filed on {filed}.",
+    deadlineFlag:
+      "Filed on {filed}, after the window closed on {deadline}. A late filing is routed to an inspector, never refused automatically.",
+    notificationPass:
+      "Notice sent {days} working days after the infraction; the legal window is {limit}.",
+    notificationFlag:
+      "Notice sent {days} working days after the infraction; the legal window is {limit}. Possible ground for nullity – inspector decides.",
+    documentsPass: "Found: {found}.",
+    documentsMissing: "Missing: {missing}. The citizen can be asked for a correction.",
+    documentsNone: "No supporting documents were attached.",
+    statementPass: "The statement by {driver} is signed and dated {date}, before the filing.",
+    statementFlag:
+      "The driver statement is not signed or not dated. Ask for a signed, dated statement.",
+    namesPass:
+      "The ID matches the registered owner, and the statement names the same person as the licence ({driver}).",
+    namesFlag: "Names differ between documents: {detail}. Check the originals.",
+    licencePass: "Licence {licence} is valid until {until}, after the infraction on {infraction}.",
+    licenceFlag: "Licence {licence} expired on {until}, before the infraction on {infraction}.",
+    driverInfo:
+      "Driver can be identified ({driver}) – decision on the merits is human only (R7, C-038/2020).",
+    driverFlag:
+      "The owner cannot be presumed to be the driver, and the filing does not yet identify who was driving (R7, C-038/2020).",
+    cameraPass: "ANSV lists camera {camera} as authorised on {date}.",
+    cameraFlag: "ANSV does not list camera {camera} as authorised on {date}.",
+    platePass: "The plate read from the image ({image}) matches RUNT ({plate}).",
+    plateFlag: "The image reads {image} but RUNT has {plate}. Confirm the image before deciding.",
+    saleFlag:
+      "Bill of sale dated {sale}, before the infraction on {infraction}, but RUNT still lists {owner} as owner. Sold but not transferred – inspector decides.",
+    saleInfo: "A sale is claimed but the documents do not show a sale before the infraction.",
+    bulkPass: "Covered by {act}, which is in force. The fine is revoked.",
+    bulkFlag: "The camera was non-compliant, but no legal act is in force yet.",
+    similarityFlag:
+      "{percent}% identical to {count} other {representative} filings, with no new evidence. Grouping saves reading time; review this case individually.",
+    similarityPass:
+      "{percent}% similar to the {representative} template, but adds new evidence: {document}.",
+    duplicatePass: "No other case on fine {fine}.",
+    duplicateFlag: "Fine {fine} is also challenged in {others}.",
+    imagePass: "The photo was captured on {captured} and not edited afterwards.",
+    imageFlag:
+      "The photo was saved with {software} on {modified}, after it was captured on {captured}. Possible image manipulation – never an automatic rejection.",
+    poaPass: "The power of attorney for {person} is valid until {expires}.",
+    poaFlag:
+      "The power of attorney for {person} expired on {expires}, before the filing. The case is paused as Needs correction until a valid one is sent.",
+    eligibilityPass: "The fine is paid and revoked, and no refund has been paid yet.",
+    eligibilityHold:
+      "Paid on a non-compliant camera, but no act is in force: the refund stays on hold.",
+    eligibilityFlag: "The fine is not revoked, or it was already refunded.",
+    thresholdPass: "{amount} is within the {threshold} automatic approval threshold.",
+    thresholdFlag: "{amount} is above the {threshold} threshold, so a person approves it.",
+    holderPass: "The account ending {last4} is in the claimant's name.",
+    holderFlag: "Account holder ({holder}) doesn't match the claimant.",
+    holderMissing: "No bank account provided yet.",
+    duplicateClaimPass: "No earlier refund claim on fine {fine}.",
+    duplicateClaimFlag: "Duplicate claim on fine {fine} (already claimed in {others}).",
+    accountReusePass: "The account is not used by other claimants.",
+    accountReuseFlag: "Account ending {last4} receives {count} refunds from different claimants.",
+  },
+} as const;

@@ -336,7 +336,7 @@ const templatedFacts = [
   "We request the revocation of the fine and the closure of the proceedings.",
 ];
 const powerOfAttorney: ChallengeCase["evidence"] = [
-  { name: "power-of-attorney.pdf", kind: "Other" },
+  { name: "power-of-attorney.pdf", kind: "Power of attorney" },
 ];
 
 function legalRapido(
@@ -438,7 +438,7 @@ export const challenges: ChallengeCase[] = [
     reason: "Vehicle sold before the fine",
     submittedOn: "2026-11-20",
     facts: ["I sold the car on 2 October 2026. The buyer has not completed the transfer in RUNT."],
-    evidence: [{ name: "sale-contract.pdf", kind: "Sale contract" }],
+    evidence: [{ name: "sale-contract.pdf", kind: "Bill of sale" }],
     status: "Hearing scheduled",
     messageValues: {
       date: "02 Dec 2026",
