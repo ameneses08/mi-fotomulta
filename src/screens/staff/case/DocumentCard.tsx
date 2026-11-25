@@ -47,9 +47,7 @@ export function DocumentCard({ caseId, document }: { caseId: string; document: E
                   <p className="text-xs text-muted-foreground">
                     {field.name} · p.{field.page}
                   </p>
-                  <p className="text-sm font-medium">
-                    {display(field.value)}
-                  </p>
+                  <p className="text-sm font-medium">{display(field.value)}</p>
                 </div>
                 <label className="flex items-center gap-2 text-xs font-normal">
                   <input
