@@ -1,5 +1,5 @@
 import { AIPanel } from "@/components/AIPanel";
-import { FindingList } from "@/components/analysis/FindingList";
+import { AnalysisReport } from "@/components/analysis/AnalysisReport";
 import { RULES } from "@/data/ruleCatalogue";
 import { caseBriefFor } from "@/lib/brief";
 import { useAnalysis } from "@/store/selectors";
@@ -12,11 +12,14 @@ export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
   return (
     <section className="staff-column" aria-labelledby="brief-title">
       <h2 id="brief-title" className="column-title">
-        AI summary
+        AI analysis
       </h2>
-      <AIPanel title="Summary and suggested outcome" audience="staff" className="mt-0">
-        <p>{brief.brief}</p>
-        <p className="mt-3 text-sm">
+      <AnalysisReport analysis={analysis} />
+      <p className="mt-2 text-xs text-muted-foreground">
+        The summary never replaces the original filing. Read both.
+      </p>
+      <AIPanel title="Suggested outcome" audience="staff">
+        <p className="text-sm">
           <span className="font-semibold text-foreground">Suggested outcome: </span>
           {brief.suggestion}
         </p>
@@ -29,15 +32,10 @@ export function BriefColumn({ challenge }: { challenge: ChallengeCase }) {
           ))}
         </ul>
       </AIPanel>
-      <p className="mt-2 text-xs text-muted-foreground">
-        The summary never replaces the original filing. Read both.
-      </p>
-      <h3 className="column-subtitle">Flags and checks</h3>
-      <p className="mb-3 text-xs text-muted-foreground">
+      <p className="mt-3 text-xs text-muted-foreground">
         A = automated · S = AI-supported, human signs off · H = human only. Checks route a case;
         they never close it.
       </p>
-      <FindingList findings={analysis?.findings ?? []} />
     </section>
   );
 }

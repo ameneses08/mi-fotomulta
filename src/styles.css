@@ -1381,3 +1381,65 @@
 [aria-invalid="true"] {
   border-color: var(--danger);
 }
+
+/* AI analysis report */
+.analysis {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.analysis.compact {
+  padding: 12px;
+}
+.analysis-category {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted-foreground);
+  margin-bottom: 6px;
+}
+.finding-row {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--background);
+}
+.confidence {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+.confidence-high {
+  color: var(--foreground);
+}
+.rule-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--muted);
+  border: 1px solid var(--border);
+}
+.why-toggle {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  min-height: 28px;
+}
+.review-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.review-note svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}

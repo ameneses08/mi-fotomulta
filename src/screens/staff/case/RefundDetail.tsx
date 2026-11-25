@@ -1,7 +1,7 @@
 import { AIPanel } from "@/components/AIPanel";
 import { AuditLog } from "@/components/AuditLog";
 import { DataRow } from "@/components/DataRow";
-import { FindingList } from "@/components/analysis/FindingList";
+import { AnalysisReport } from "@/components/analysis/AnalysisReport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { aiScripts } from "@/data/aiScripts";
 import { isOpenFlag } from "@/lib/analysis";
@@ -20,7 +20,8 @@ function briefFor(findings: AnalysisFinding[]): string {
 
 export function RefundDetail({ refund }: { refund: RefundCase }) {
   const fine = useFine(refund.fineId);
-  const findings = useAnalysis(refund.id)?.findings ?? [];
+  const analysis = useAnalysis(refund.id);
+  const findings = analysis?.findings ?? [];
   const audit = useCaseAudit(refund.id);
   const account = refund.bankAccount;
 
@@ -66,8 +67,9 @@ export function RefundDetail({ refund }: { refund: RefundCase }) {
             <AIPanel title="Refund brief" audience="staff" className="mt-0">
               <p>{briefFor(findings)}</p>
             </AIPanel>
-            <h3 className="column-subtitle">AI analysis</h3>
-            <FindingList findings={findings} />
+            <div className="mt-4">
+              <AnalysisReport analysis={analysis} />
+            </div>
           </section>
           <RefundDecisionPanel key={refund.status} refund={refund} />
         </div>
