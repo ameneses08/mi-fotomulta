@@ -262,7 +262,11 @@
   font-weight: 650;
 }
 .fine-card {
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.fine-card .fine-card-bottom {
+  margin-top: auto;
 }
 .fine-meta {
   display: flex;

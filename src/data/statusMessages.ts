@@ -107,3 +107,14 @@ export const CLOCK_RISK_TONES: Record<ClockRisk, Tone> = {
 };
 
 export const OTHER_AUTHORITY_NOTE = "Issued by another authority – contact them directly";
+
+/** The next step shown on each fine card in "My fines". */
+export const FINE_NEXT_ACTIONS: Record<FineStatus, string> = {
+  "Pending payment": "Pay or challenge",
+  Paid: "View details",
+  "Under review": "See why",
+  "Challenge in progress": "Track my challenge",
+  Revoked: "View details",
+  "Refund on hold": "View my refund",
+  "Another authority": "How to contact Soacha",
+};

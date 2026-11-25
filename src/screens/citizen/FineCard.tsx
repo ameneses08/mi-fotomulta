@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { FINE_STATUS_TONES, OTHER_AUTHORITY_NOTE } from "@/data/statusMessages";
+import { FINE_NEXT_ACTIONS, FINE_STATUS_TONES, OTHER_AUTHORITY_NOTE } from "@/data/statusMessages";
 import { formatCOP, formatDate } from "@/lib/format";
 import { useFineStatus } from "@/store/selectors";
 import type { Fine } from "@/types";
@@ -10,7 +10,7 @@ import type { Fine } from "@/types";
 export function FineCard({ fine }: { fine: Fine }) {
   const status = useFineStatus(fine.id);
   return (
-    <article className="panel fine-card" aria-labelledby={`fine-${fine.id}`}>
+    <article className="panel fine-card h-full" aria-labelledby={`fine-${fine.id}`}>
       <div className="fine-meta">
         <span>{fine.id}</span>
         <span className="text-sm">{formatDate(fine.infractionDate)}</span>
@@ -29,9 +29,9 @@ export function FineCard({ fine }: { fine: Fine }) {
           <Link
             to="/citizen/fines/$id"
             params={{ id: fine.id }}
-            aria-label={`View fine ${fine.id}`}
+            aria-label={`${status ? FINE_NEXT_ACTIONS[status] : "View"} – fine ${fine.id}`}
           >
-            View
+            {status ? FINE_NEXT_ACTIONS[status] : "View"}
             <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </Button>
