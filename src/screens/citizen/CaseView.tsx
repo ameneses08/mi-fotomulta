@@ -13,15 +13,21 @@ export function CaseView({ caseId }: { caseId: string }) {
   }
 
   return (
-    <>
+    <div className="@container">
       <h1 className="page-title">Your challenge</h1>
       <p className="page-subtitle">
         Case {challenge.id} · Fine {challenge.fineId}
       </p>
-      <StageTracker challenge={challenge} />
-      <h2 className="mt-7 text-lg font-semibold">Case history</h2>
-      <AuditLog entries={history} />
-      <Notice>Dates are illustrative. No official challenge has been filed.</Notice>
-    </>
+      <div className="grid items-start gap-x-8 @2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        <StageTracker challenge={challenge} />
+        <section aria-labelledby="case-history">
+          <h2 id="case-history" className="mt-7 text-lg font-semibold @2xl:mt-6">
+            Case history
+          </h2>
+          <AuditLog entries={history} />
+          <Notice>Dates are illustrative. No official challenge has been filed.</Notice>
+        </section>
+      </div>
+    </div>
   );
 }

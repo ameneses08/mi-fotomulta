@@ -23,7 +23,7 @@ export function BankDetailsForm({ refund }: { refund: RefundCase }) {
         save(refund.id);
       }}
     >
-      <h2 className="mt-8 text-xl font-semibold">Where should we pay you?</h2>
+      <h2 className="mt-8 text-xl font-semibold @2xl:mt-6">Where should we pay you?</h2>
       <p className="page-subtitle">The account must be in your name. Use fictional details only.</p>
       <label className="form-field">
         Bank

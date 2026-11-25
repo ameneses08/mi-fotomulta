@@ -24,15 +24,30 @@ export function RefundScreen({ id }: { id: string }) {
       <p className="page-subtitle">
         Refund {refund.id} · Fine {refund.fineId}
       </p>
-      <div className="money-value">{formatCOP(refund.amount)}</div>
-      <div className={cn("tracker", highlight && "tracker-flash")}>
-        <ProgressSteps steps={refundSteps(refund)} label="Refund progress" />
-        <section className="panel" aria-live="polite">
-          <StatusBadge text={refund.status} tone={REFUND_STATUS_TONES[refund.status]} />
-          <p className="mt-4 text-lg font-semibold leading-snug">{refundMessage(refund)}</p>
-        </section>
+      <div className="grid items-start gap-x-8 @2xl:grid-cols-2">
+        <div className={cn("tracker", highlight && "tracker-flash")}>
+          <div className="money-value">{formatCOP(refund.amount)}</div>
+          <ProgressSteps steps={refundSteps(refund)} label="Refund progress" />
+          <section className="panel" aria-live="polite">
+            <StatusBadge text={refund.status} tone={REFUND_STATUS_TONES[refund.status]} />
+            <p className="mt-4 text-lg font-semibold leading-snug">{refundMessage(refund)}</p>
+          </section>
+        </div>
+        {ACCEPTS_DETAILS.has(refund.status) ? (
+          <BankDetailsForm refund={refund} />
+        ) : (
+          <section className="panel mt-8 @2xl:mt-6" aria-labelledby="paid-to">
+            <h2 id="paid-to" className="font-semibold">
+              Payment details
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {refund.bankAccount
+                ? `${refund.bankAccount.bank} account ending ${refund.bankAccount.last4}, in your name.`
+                : "No account yet."}
+            </p>
+          </section>
+        )}
       </div>
-      {ACCEPTS_DETAILS.has(refund.status) && <BankDetailsForm refund={refund} />}
     </CitizenLayout>
   );
 }
