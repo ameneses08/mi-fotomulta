@@ -17,6 +17,9 @@ import { aiScripts } from "./aiScripts";
 /** Fixed "today" so legal clocks and dates look the same in every recording. */
 export const DEMO_TODAY = "2026-11-25";
 
+/** Version of this seed. Saved demos from another version are discarded on load. */
+export const DEMO_DATA_VERSION = 3;
+
 export const INSPECTOR_NAME = "Laura Gómez";
 export const INSPECTOR_LABEL = `Inspector ${INSPECTOR_NAME}`;
 
@@ -313,14 +316,19 @@ const powerOfAttorney: ChallengeCase["evidence"] = [
   { name: "power-of-attorney.pdf", kind: "Other" },
 ];
 
-function legalRapido(id: string, fineId: string, submittedOn: string): ChallengeCase {
+function legalRapido(
+  id: string,
+  fineId: string,
+  submittedOn: string,
+  extraEvidence: ChallengeCase["evidence"] = [],
+): ChallengeCase {
   return challenge({
     id,
     fineId,
     reason: "Camera not authorised",
     submittedOn,
     facts: templatedFacts,
-    evidence: powerOfAttorney,
+    evidence: [...powerOfAttorney, ...extraEvidence],
     representative: LEGAL_RAPIDO,
   });
 }
@@ -353,7 +361,9 @@ export const challenges: ChallengeCase[] = [
   legalRapido("C-1043", "F-3101", "2026-11-13"),
   legalRapido("C-1044", "F-3102", "2026-11-16"),
   legalRapido("C-1045", "F-3103", "2026-11-17"),
-  legalRapido("C-1046", "F-3104", "2026-11-18"),
+  legalRapido("C-1046", "F-3104", "2026-11-18", [
+    { name: "photo-camera-without-signage.jpg", kind: "Photo" },
+  ]),
   legalRapido("C-1047", "F-3105", "2026-11-19"),
   challenge({
     id: "C-1048",

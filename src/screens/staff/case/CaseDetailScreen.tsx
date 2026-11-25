@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { StaffLayout } from "@/components/layout/StaffLayout";
 import { DEMO_TODAY } from "@/data/mockData";
 import { CHALLENGE_STATUS_TONES, REFUND_STATUS_TONES } from "@/data/statusMessages";
+import { groupIdFor } from "@/lib/queue";
 import { challengeClock } from "@/lib/sla";
 import { useChallenge, useRefund } from "@/store/selectors";
 import { CaseHeader } from "./CaseHeader";
@@ -30,6 +31,15 @@ export function CaseDetailScreen({ id }: { id: string }) {
             tone={CHALLENGE_STATUS_TONES[challenge.status]}
             clock={challengeClock(challenge, DEMO_TODAY)}
           />
+          {challenge.representative && (
+            <Link
+              to="/staff/groups/$id"
+              params={{ id: groupIdFor(challenge.representative) }}
+              className="group-chip mb-4"
+            >
+              Part of the {challenge.representative} group – decided individually
+            </Link>
+          )}
           <ChallengeDetail challenge={challenge} />
         </>
       )}

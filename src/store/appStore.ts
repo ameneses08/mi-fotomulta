@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { aiScripts, assistantScripts } from "@/data/aiScripts";
 import {
   BULK_ACT_ID,
+  DEMO_DATA_VERSION,
   cameras,
   challenges,
   citizen,
@@ -432,7 +433,9 @@ export const useAppStore = create<AppState>()(
     },
     {
       name: DEMO_STORAGE_KEY,
-      version: 2,
+      // Bump DEMO_DATA_VERSION whenever the seed changes: older saved demos are then ignored.
+      version: DEMO_DATA_VERSION,
+      migrate: () => initialData(),
       storage: createJSONStorage(() => sessionStorage),
       partialize: persistedData,
       // Hydrate after mount so the server-rendered HTML matches the first client render.

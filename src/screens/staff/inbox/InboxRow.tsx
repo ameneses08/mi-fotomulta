@@ -28,10 +28,10 @@ export function InboxRow({ row, group }: { row: ChallengeRow; group: CaseGroup |
       <td>
         <div>{challenge.reason}</div>
         {group && (
-          <span className="group-chip">
+          <Link to="/staff/groups/$id" params={{ id: group.id }} className="group-chip">
             <Layers size={13} aria-hidden="true" />
             {group.representative.split(" ")[0]} group · {group.cases.length}
-          </span>
+          </Link>
         )}
       </td>
       <td>

@@ -150,8 +150,19 @@ describe("evaluateChallengeRules", () => {
     expect(r7).toMatchObject({ level: "H", result: "Flag" });
   });
 
+  it("passes R9 when a represented case adds new evidence", () => {
+    const challenge = makeChallenge({
+      representative: "LegalRápido S.A.S.",
+      evidence: [{ name: "photo.jpg", kind: "Photo" }],
+    });
+    expect(resultOf("R9", evaluateChallengeRules(challenge, makeContext()))).toBe("Pass");
+  });
+
   it("flags templated arguments from a representative (R9)", () => {
-    const challenge = makeChallenge({ representative: "LegalRápido S.A.S." });
+    const challenge = makeChallenge({
+      representative: "LegalRápido S.A.S.",
+      evidence: [{ name: "power-of-attorney.pdf", kind: "Other" }],
+    });
     expect(resultOf("R9", evaluateChallengeRules(challenge, makeContext()))).toBe("Flag");
   });
 

@@ -20,6 +20,7 @@ import { Route as CitizenCasesIdRouteImport } from './routes/citizen_.cases.$id'
 import { Route as CitizenFinesIdRouteImport } from './routes/citizen_.fines.$id'
 import { Route as CitizenRefundsIdRouteImport } from './routes/citizen_.refunds.$id'
 import { Route as StaffCasesIdRouteImport } from './routes/staff_.cases.$id'
+import { Route as StaffGroupsIdRouteImport } from './routes/staff_.groups.$id'
 import { Route as CitizenFinesIdChallengeRouteImport } from './routes/citizen_.fines.$id_.challenge'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,11 @@ const StaffCasesIdRoute = StaffCasesIdRouteImport.update({
   path: '/staff/cases/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffGroupsIdRoute = StaffGroupsIdRouteImport.update({
+  id: '/staff_/groups/$id',
+  path: '/staff/groups/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CitizenFinesIdChallengeRoute = CitizenFinesIdChallengeRouteImport.update({
   id: '/citizen_/fines/$id_/challenge',
   path: '/citizen/fines/$id/challenge',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
   '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
   '/staff/cases/$id': typeof StaffCasesIdRoute
+  '/staff/groups/$id': typeof StaffGroupsIdRoute
   '/citizen/cases/': typeof CitizenCasesIndexRoute
   '/citizen/fines/$id/challenge': typeof CitizenFinesIdChallengeRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
   '/citizen/refunds/$id': typeof CitizenRefundsIdRoute
   '/staff/cases/$id': typeof StaffCasesIdRoute
+  '/staff/groups/$id': typeof StaffGroupsIdRoute
   '/citizen/cases': typeof CitizenCasesIndexRoute
   '/citizen/fines/$id/challenge': typeof CitizenFinesIdChallengeRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/citizen_/fines/$id': typeof CitizenFinesIdRoute
   '/citizen_/refunds/$id': typeof CitizenRefundsIdRoute
   '/staff_/cases/$id': typeof StaffCasesIdRoute
+  '/staff_/groups/$id': typeof StaffGroupsIdRoute
   '/citizen_/cases/': typeof CitizenCasesIndexRoute
   '/citizen_/fines/$id_/challenge': typeof CitizenFinesIdChallengeRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/citizen/fines/$id'
     | '/citizen/refunds/$id'
     | '/staff/cases/$id'
+    | '/staff/groups/$id'
     | '/citizen/cases/'
     | '/citizen/fines/$id/challenge'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/citizen/fines/$id'
     | '/citizen/refunds/$id'
     | '/staff/cases/$id'
+    | '/staff/groups/$id'
     | '/citizen/cases'
     | '/citizen/fines/$id/challenge'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/citizen_/fines/$id'
     | '/citizen_/refunds/$id'
     | '/staff_/cases/$id'
+    | '/staff_/groups/$id'
     | '/citizen_/cases/'
     | '/citizen_/fines/$id_/challenge'
   fileRoutesById: FileRoutesById
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   CitizenFinesIdRoute: typeof CitizenFinesIdRoute
   CitizenRefundsIdRoute: typeof CitizenRefundsIdRoute
   StaffCasesIdRoute: typeof StaffCasesIdRoute
+  StaffGroupsIdRoute: typeof StaffGroupsIdRoute
   CitizenCasesIndexRoute: typeof CitizenCasesIndexRoute
   CitizenFinesIdChallengeRoute: typeof CitizenFinesIdChallengeRoute
 }
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffCasesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff_/groups/$id': {
+      id: '/staff_/groups/$id'
+      path: '/staff/groups/$id'
+      fullPath: '/staff/groups/$id'
+      preLoaderRoute: typeof StaffGroupsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/citizen_/fines/$id_/challenge': {
       id: '/citizen_/fines/$id_/challenge'
       path: '/citizen/fines/$id/challenge'
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   CitizenFinesIdRoute: CitizenFinesIdRoute,
   CitizenRefundsIdRoute: CitizenRefundsIdRoute,
   StaffCasesIdRoute: StaffCasesIdRoute,
+  StaffGroupsIdRoute: StaffGroupsIdRoute,
   CitizenCasesIndexRoute: CitizenCasesIndexRoute,
   CitizenFinesIdChallengeRoute: CitizenFinesIdChallengeRoute,
 }
