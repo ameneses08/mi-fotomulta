@@ -1,209 +1,311 @@
 import { create } from "zustand";
 import { aiScripts } from "@/data/aiScripts";
 import {
+  BULK_ACT_ID,
+  cameras,
+  challenges,
   citizen,
+  DEMO_TODAY,
   fines,
-  initialCases,
+  HERO_CASE_ID,
+  HERO_FINE_ID,
+  initialAudit,
+  INSPECTOR_LABEL,
+  INSPECTOR_NAME,
   legalActs,
-  type Fine,
-  type CaseRecord,
+  refunds,
 } from "@/data/mockData";
-type RefundForm = { bank: string; type: string; account: string; consent: boolean };
-type State = {
-  citizen: typeof citizen;
+import {
+  caseIdForFine,
+  clampFact,
+  completeAutomaticChecks,
+  draftRequest,
+  emptyDraft,
+  guessEvidenceKind,
+  submitDraft,
+  validateStep,
+  type ChallengeDraft,
+} from "@/lib/challenge";
+import { applyDecision } from "@/lib/decision";
+import {
+  autoVerifyRefund,
+  decideRefund,
+  EMPTY_BANK_FORM,
+  submitBankDetails,
+  type BankForm,
+} from "@/lib/refund";
+import { registerAct } from "@/lib/revocation";
+import { createAuditEntry } from "@/lib/transitions";
+import type { RulesContext } from "@/lib/rules";
+import type {
+  AuditEntry,
+  Camera,
+  ChallengeCase,
+  Citizen,
+  DecisionKind,
+  Fine,
+  LegalAct,
+  RefundCase,
+  RefundDecisionKind,
+} from "@/types";
+import { cancelScheduled, demoTimestamp, schedule } from "./demoClock";
+
+/** Delays for simulated background work, in milliseconds. */
+export const SIMULATION_DELAYS = { checksDone: 3000, refundCheck: 2500 };
+
+interface DemoData {
+  citizen: Citizen;
   fines: Fine[];
-  cases: CaseRecord[];
-  legalActs: typeof legalActs;
-  recoverableAmount: number;
-  step: number;
+  cameras: Camera[];
+  legalActs: LegalAct[];
+  challenges: ChallengeCase[];
+  refunds: RefundCase[];
+  audit: AuditEntry[];
+  draft: ChallengeDraft;
+  draftError: string;
+  bankForm: BankForm;
+  bankError: string;
+  bankSaved: boolean;
+  /** State before the bulk act was registered, so the demo can revert it. */
+  actSnapshot: { legalActs: LegalAct[]; refunds: RefundCase[] } | null;
+}
+
+export interface DecisionRequest {
+  kind: DecisionKind;
   reason: string;
-  facts: string[];
-  pastedText: string;
-  evidence: string[];
-  draft: string;
-  challengeFineId: string;
-  challengeError: string;
-  refundForm: RefundForm;
-  refundSaved: boolean;
-  refundError: string;
-  refundStage: number;
-  paymentFineId: string | null;
-  queueFilter: string;
-  selectedCaseId: string;
-  startChallenge: (id: string) => void;
-  setReason: (value: string) => void;
+  citizenMessage: string;
+  aiSuggestion: DecisionKind;
+}
+
+interface Actions {
+  startChallenge: (fineId: string) => void;
+  setReason: (reason: ChallengeDraft["reason"]) => void;
   setFact: (index: number, value: string) => void;
   setPastedText: (value: string) => void;
   structureClaim: () => void;
-  addEvidence: (names: string[]) => void;
+  addEvidence: (fileNames: string[]) => void;
   removeEvidence: (name: string) => void;
-  setDraft: (value: string) => void;
+  setRequest: (value: string) => void;
   nextStep: () => void;
   previousStep: () => void;
   submitChallenge: () => string | null;
-  setRefundField: <K extends keyof RefundForm>(field: K, value: RefundForm[K]) => void;
-  saveRefund: () => void;
-  openPayment: (id: string | null) => void;
-  confirmMockPayment: () => void;
-  setQueueFilter: (value: string) => void;
-  selectCase: (id: string) => void;
-  advanceCase: (id: string) => void;
-};
-export const useAppStore = create<State>((set, get) => ({
-  citizen,
-  fines,
-  cases: initialCases,
-  legalActs,
-  recoverableAmount: fines
-    .filter((f) => f.paid && !f.authorised && !f.external)
-    .reduce((total, f) => total + f.amount, 0),
-  step: 0,
-  reason: "",
-  facts: ["", "", ""],
-  pastedText: "",
-  evidence: [],
-  draft: "",
-  challengeFineId: "F-2041",
-  challengeError: "",
-  refundForm: { bank: "", type: "Savings", account: "", consent: false },
-  refundSaved: false,
-  refundError: "",
-  refundStage: 0,
-  paymentFineId: null,
-  queueFilter: "All cases",
-  selectedCaseId: "C-1042",
-  startChallenge: (id) =>
-    set({
-      challengeFineId: id,
-      step: 0,
-      reason: "",
-      facts: ["", "", ""],
-      pastedText: "",
-      evidence: [],
-      draft: "",
-      challengeError: "",
-    }),
-  setReason: (reason) => set({ reason, challengeError: "" }),
-  setFact: (index, value) =>
+  decideChallenge: (caseId: string, request: DecisionRequest) => string | null;
+  decideRefundCase: (refundId: string, kind: RefundDecisionKind, reason: string) => string | null;
+  setBankField: <K extends keyof BankForm>(field: K, value: BankForm[K]) => void;
+  saveBankDetails: (refundId: string) => void;
+  registerLegalAct: (actId: string, official: string) => string | null;
+  revertLegalAct: () => void;
+  payFine: (fineId: string) => void;
+  resetDemo: () => void;
+}
+
+export type AppState = DemoData & Actions;
+
+function initialData(): DemoData {
+  return {
+    citizen,
+    fines: [...fines],
+    cameras: [...cameras],
+    legalActs: [...legalActs],
+    challenges: [...challenges],
+    refunds: [...refunds],
+    audit: [...initialAudit],
+    draft: emptyDraft(HERO_FINE_ID),
+    draftError: "",
+    bankForm: EMPTY_BANK_FORM,
+    bankError: "",
+    bankSaved: false,
+    actSnapshot: null,
+  };
+}
+
+export function rulesContextOf(state: DemoData): RulesContext {
+  const { fines, cameras, legalActs, challenges, refunds } = state;
+  return { fines, cameras, legalActs, challenges, refunds };
+}
+
+function replaceById<T extends { id: string }>(items: T[], updated: T): T[] {
+  const exists = items.some((item) => item.id === updated.id);
+  return exists
+    ? items.map((item) => (item.id === updated.id ? updated : item))
+    : [...items, updated];
+}
+
+export const useAppStore = create<AppState>((set, get) => {
+  const updateDraft = (patch: Partial<ChallengeDraft>) =>
+    set((s) => ({ draft: { ...s.draft, ...patch }, draftError: "" }));
+
+  const finishAutomaticChecks = (caseId: string) => {
+    const current = get().challenges.find((c) => c.id === caseId);
+    if (current?.status !== "Received") return;
+    const result = completeAutomaticChecks(current, INSPECTOR_LABEL, demoTimestamp());
+    if (!result.ok) return;
     set((s) => ({
-      facts: s.facts.map((f, i) => (i === index ? value.slice(0, 500) : f)),
-      challengeError: "",
-    })),
-  setPastedText: (pastedText) => set({ pastedText }),
-  structureClaim: () => {
-    if (get().pastedText.trim()) set({ facts: [...aiScripts.structuredFacts], challengeError: "" });
-  },
-  addEvidence: (names) => set((s) => ({ evidence: [...new Set([...s.evidence, ...names])] })),
-  removeEvidence: (name) => set((s) => ({ evidence: s.evidence.filter((n) => n !== name) })),
-  setDraft: (draft) => set({ draft, challengeError: "" }),
-  nextStep: () => {
-    const s = get();
-    if (s.step === 0 && !s.reason) {
-      set({ challengeError: "Choose a reason to continue." });
-      return;
-    }
-    if (s.step === 1 && s.facts.some((f) => !f.trim())) {
-      set({ challengeError: "Answer all three questions to continue." });
-      return;
-    }
-    set({
-      step: Math.min(3, s.step + 1),
-      challengeError: "",
-      ...(s.step === 2 && !s.draft
-        ? { draft: aiScripts.draft.replaceAll("F-2041", s.challengeFineId) }
-        : {}),
-    });
-  },
-  previousStep: () => set((s) => ({ step: Math.max(0, s.step - 1), challengeError: "" })),
-  submitChallenge: () => {
-    const s = get();
-    if (!s.draft.trim()) {
-      set({ challengeError: "Your request cannot be empty." });
+      challenges: replaceById(s.challenges, result.challenge),
+      audit: [...s.audit, ...result.audit],
+    }));
+  };
+
+  const runRefundCheck = (refundId: string) => {
+    const state = get();
+    const current = state.refunds.find((r) => r.id === refundId);
+    if (!current) return;
+    const result = autoVerifyRefund(current, rulesContextOf(state), DEMO_TODAY, demoTimestamp());
+    if (!result?.ok) return;
+    set((s) => ({
+      refunds: replaceById(s.refunds, result.refund),
+      audit: [...s.audit, ...result.audit],
+    }));
+  };
+
+  return {
+    ...initialData(),
+
+    startChallenge: (fineId) => set({ draft: emptyDraft(fineId), draftError: "" }),
+    setReason: (reason) => updateDraft({ reason }),
+    setFact: (index, value) =>
+      updateDraft({ facts: get().draft.facts.map((f, i) => (i === index ? clampFact(value) : f)) }),
+    setPastedText: (pastedText) => updateDraft({ pastedText }),
+    structureClaim: () => {
+      if (get().draft.pastedText.trim()) updateDraft({ facts: [...aiScripts.structuredFacts] });
+    },
+    addEvidence: (fileNames) => {
+      const known = new Set(get().draft.evidence.map((e) => e.name));
+      const added = fileNames
+        .filter((name) => !known.has(name))
+        .map((name) => ({ name, kind: guessEvidenceKind(name) }));
+      updateDraft({ evidence: [...get().draft.evidence, ...added] });
+    },
+    removeEvidence: (name) =>
+      updateDraft({ evidence: get().draft.evidence.filter((e) => e.name !== name) }),
+    setRequest: (request) => updateDraft({ request }),
+    nextStep: () => {
+      const { draft, fines: allFines, citizen: owner } = get();
+      const error = validateStep(draft);
+      if (error) return set({ draftError: error });
+      const fine = allFines.find((f) => f.id === draft.fineId);
+      const needsRequest = draft.step === 2 && !draft.request && fine;
+      updateDraft({
+        step: Math.min(3, draft.step + 1),
+        ...(needsRequest ? { request: draftRequest(draft, fine, owner) } : {}),
+      });
+    },
+    previousStep: () => updateDraft({ step: Math.max(0, get().draft.step - 1) }),
+    submitChallenge: () => {
+      const { draft, citizen: owner } = get();
+      const caseId = caseIdForFine(draft.fineId, HERO_FINE_ID, HERO_CASE_ID);
+      const result = submitDraft(draft, caseId, owner, DEMO_TODAY, demoTimestamp());
+      if ("error" in result) {
+        set({ draftError: result.error });
+        return null;
+      }
+      set((s) => ({
+        challenges: replaceById(s.challenges, result.challenge),
+        audit: [...s.audit, ...result.audit],
+        draft: emptyDraft(draft.fineId),
+      }));
+      schedule(() => finishAutomaticChecks(caseId), SIMULATION_DELAYS.checksDone);
+      return caseId;
+    },
+
+    decideChallenge: (caseId, request) => {
+      const current = get().challenges.find((c) => c.id === caseId);
+      if (!current) return "Case not found.";
+      const result = applyDecision(current, {
+        ...request,
+        inspector: INSPECTOR_NAME,
+        today: DEMO_TODAY,
+        timestamp: demoTimestamp(),
+      });
+      if (!result.ok) return result.error;
+      set((s) => ({
+        challenges: replaceById(s.challenges, { ...result.entity, holder: INSPECTOR_LABEL }),
+        audit: [...s.audit, ...result.audit],
+      }));
       return null;
-    }
-    const id = s.challengeFineId === "F-2041" ? "C-1042" : `C-${s.challengeFineId.slice(2)}`;
-    const record: CaseRecord = {
-      ...initialCases[0],
-      id,
-      fineId: s.challengeFineId,
-      citizen: citizen.name,
-      reason: s.reason,
-      stage: 1,
-      holder: "Automatic checks",
-      expected: "04 Dec 2026",
-      statusMessage: "We are checking your information",
-      history: [...(initialCases[0]?.history ?? [])],
-    };
-    set({
-      cases: [...s.cases.filter((c) => c.id !== id), record],
-      fines: s.fines.map((f) =>
-        f.id === s.challengeFineId ? { ...f, status: "Being checked", tone: "info" } : f,
-      ),
-      selectedCaseId: id,
-    });
-    return id;
-  },
-  setRefundField: (field, value) =>
-    set((s) => ({
-      refundForm: { ...s.refundForm, [field]: value },
-      refundSaved: false,
-      refundError: "",
-    })),
-  saveRefund: () => {
-    const f = get().refundForm;
-    if (!f.bank.trim() || !/^\d{6,20}$/.test(f.account)) {
-      set({ refundError: "Choose a bank and enter an account number with 6–20 digits." });
-      return;
-    }
-    if (!f.consent) {
-      set({ refundError: "Your separate consent is required to save payment details." });
-      return;
-    }
-    set({ refundSaved: true, refundError: "" });
-  },
-  openPayment: (paymentFineId) => set({ paymentFineId }),
-  confirmMockPayment: () =>
-    set((s) => ({
-      fines: s.fines.map((f) =>
-        f.id === s.paymentFineId ? { ...f, paid: true, status: "Paid", tone: "success" } : f,
-      ),
-      paymentFineId: null,
-    })),
-  setQueueFilter: (queueFilter) => set({ queueFilter }),
-  selectCase: (selectedCaseId) => set({ selectedCaseId }),
-  advanceCase: (id) =>
-    set((s) => ({
-      cases: s.cases.map((c) =>
-        c.id === id && c.stage < 4
-          ? {
-              ...c,
-              stage: c.stage + 1,
-              holder: "Inspector Laura Gómez",
-              statusMessage:
-                [
-                  "Challenge received",
-                  "We are checking your information",
-                  "Your hearing is being arranged",
-                  "An inspector is preparing your decision",
-                  "Your case is closed",
-                ][c.stage + 1] ?? "Your case is closed",
-              history: [
-                {
-                  title:
-                    [
-                      "Submitted",
-                      "Being checked",
-                      "Hearing scheduled",
-                      "Decision in preparation",
-                      "Case closed",
-                    ][c.stage + 1] ?? "Case updated",
-                  date: "25 Nov 2026 · 11:00",
-                  detail: "Updated by Inspector Laura Gómez in the demo.",
-                },
-                ...c.history,
-              ],
-            }
-          : c,
-      ),
-    })),
-}));
+    },
+    decideRefundCase: (refundId, kind, reason) => {
+      const current = get().refunds.find((r) => r.id === refundId);
+      if (!current) return "Refund not found.";
+      const result = decideRefund(
+        current,
+        kind,
+        INSPECTOR_NAME,
+        reason,
+        DEMO_TODAY,
+        demoTimestamp(),
+      );
+      if (!result.ok) return result.error;
+      set((s) => ({
+        refunds: replaceById(s.refunds, result.refund),
+        audit: [...s.audit, ...result.audit],
+      }));
+      return null;
+    },
+
+    setBankField: (field, value) =>
+      set((s) => ({
+        bankForm: { ...s.bankForm, [field]: value },
+        bankError: "",
+        bankSaved: false,
+      })),
+    saveBankDetails: (refundId) => {
+      const { refunds: all, bankForm, citizen: owner } = get();
+      const current = all.find((r) => r.id === refundId);
+      if (!current) return;
+      const result = submitBankDetails(current, bankForm, owner, demoTimestamp());
+      if (!result.ok) return set({ bankError: result.error, bankSaved: false });
+      set((s) => ({
+        refunds: replaceById(s.refunds, result.refund),
+        audit: [...s.audit, ...result.audit],
+        bankSaved: true,
+        bankError: "",
+      }));
+      schedule(() => runRefundCheck(refundId), SIMULATION_DELAYS.refundCheck);
+    },
+
+    registerLegalAct: (actId, official) => {
+      const state = get();
+      const act = state.legalActs.find((a) => a.id === actId);
+      if (!act) return "Legal act not found.";
+      const result = registerAct(act, rulesContextOf(state), official, demoTimestamp());
+      if (!result.ok) return result.error;
+      set((s) => ({
+        actSnapshot: { legalActs: s.legalActs, refunds: s.refunds },
+        legalActs: replaceById(s.legalActs, result.act),
+        refunds: result.refunds,
+        audit: [...s.audit, ...result.audit],
+      }));
+      return null;
+    },
+    revertLegalAct: () => {
+      const snapshot = get().actSnapshot;
+      if (!snapshot) return;
+      const entry = createAuditEntry({
+        caseId: BULK_ACT_ID,
+        actor: INSPECTOR_NAME,
+        action: "Legal act reverted (demo only)",
+        from: "In force",
+        to: "Draft",
+        reason: "Demo control: restore Scenario B",
+        timestamp: demoTimestamp(),
+      });
+      set((s) => ({
+        legalActs: snapshot.legalActs,
+        refunds: snapshot.refunds,
+        actSnapshot: null,
+        audit: [...s.audit, entry],
+      }));
+    },
+
+    payFine: (fineId) =>
+      set((s) => ({
+        fines: s.fines.map((f) => (f.id === fineId ? { ...f, paidOn: DEMO_TODAY } : f)),
+      })),
+
+    resetDemo: () => {
+      cancelScheduled();
+      set(initialData());
+    },
+  };
+});

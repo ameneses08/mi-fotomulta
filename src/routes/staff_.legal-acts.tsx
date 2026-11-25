@@ -1,11 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LegalActsScreen } from "@/components/prototype/staff-screens";
-import { pageHead } from "@/components/prototype/shared";
+import { pageHead } from "@/lib/pageHead";
+import { LegalActsScreen } from "@/screens/staff/acts/LegalActsScreen";
+
 export const Route = createFileRoute("/staff_/legal-acts")({
   component: LegalActsScreen,
-  head: () =>
-    pageHead(
-      "Staff legal acts",
-      "View an illustrative legal-act draft in the Mi Fotomulta Clara inspector shell.",
-    ),
+  head: () => pageHead("Legal acts", "Register a bulk-revocation act and apply it fine by fine."),
 });

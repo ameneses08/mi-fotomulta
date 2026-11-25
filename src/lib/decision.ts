@@ -46,6 +46,11 @@ export function availableDecisions(status: ChallengeStatus): DecisionKind[] {
   return [];
 }
 
+/** Message templates add their own full stop after a placeholder. */
+function withoutFinalStop(text: string): string {
+  return text.trim().replace(/[.\s]+$/, "");
+}
+
 function datedValues(date: IsoDate): MessageValues {
   return { date: formatDate(date), dateIso: date };
 }
@@ -56,7 +61,7 @@ function targetFor(input: DecisionInput): { status: ChallengeStatus; values: Mes
     const appealBy = addWorkingDays(input.today, SLA_CONFIG.appealDays);
     return {
       status: "Decided",
-      values: { outcome, plain_reason: input.reason.trim(), ...datedValues(appealBy) },
+      values: { outcome, plain_reason: withoutFinalStop(input.reason), ...datedValues(appealBy) },
     };
   }
   if (input.kind === "Schedule hearing") {
@@ -73,7 +78,7 @@ function targetFor(input: DecisionInput): { status: ChallengeStatus; values: Mes
   const correctBy = addWorkingDays(input.today, SLA_CONFIG.correctionDays);
   return {
     status: "Needs correction",
-    values: { what: input.reason.trim(), ...datedValues(correctBy) },
+    values: { what: withoutFinalStop(input.reason), ...datedValues(correctBy) },
   };
 }
 

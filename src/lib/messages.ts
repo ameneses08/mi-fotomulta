@@ -2,10 +2,18 @@ import {
   CHALLENGE_MESSAGES,
   HOLDER_LABELS,
   REFUND_MESSAGES,
+  REFUND_STAGES,
   TRACKER_STAGES,
 } from "@/data/statusMessages";
 import { fillTemplate, formatCOP } from "@/lib/format";
-import type { ChallengeCase, ChallengeStatus, RefundCase, StageState, TrackerStage } from "@/types";
+import type {
+  ChallengeCase,
+  ChallengeStatus,
+  RefundCase,
+  RefundStatus,
+  StageState,
+  TrackerStage,
+} from "@/types";
 
 export function challengeMessage(challenge: ChallengeCase): string {
   return fillTemplate(CHALLENGE_MESSAGES[challenge.status], {
@@ -50,4 +58,24 @@ export function trackerSteps(challenge: ChallengeCase): TrackerStep[] {
     const skippedHearing = stage === "Hearing" && !challenge.hadHearing;
     return { stage, state: skippedHearing ? "skipped" : "done" };
   });
+}
+
+const REFUND_STAGE_INDEX: Record<RefundStatus, number> = {
+  "On hold": 0,
+  Eligible: 1,
+  Rejected: 1,
+  Appealed: 1,
+  "Verifying payment details": 2,
+  "Needs correction": 2,
+  Approved: 3,
+  Paid: 4,
+};
+
+/** Maps a refund status onto the five refund tracker stages. */
+export function refundSteps(refund: RefundCase): { label: string; state: StageState }[] {
+  const current = REFUND_STAGE_INDEX[refund.status];
+  return REFUND_STAGES.map((label, index) => ({
+    label,
+    state: index < current ? "done" : index === current ? "current" : "upcoming",
+  }));
 }

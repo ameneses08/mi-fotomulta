@@ -1,74 +1,183 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { useAppStore } from "@/store/appStore";
-import { fines, initialCases } from "@/data/mockData";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { BULK_ACT_ID, HERO_CASE_ID, HERO_FINE_ID, HERO_REFUND_ID } from "@/data/mockData";
+import { deriveFineStatus, deriveRefundEligibility } from "@/lib/rules";
+import { rulesContextOf, SIMULATION_DELAYS, useAppStore } from "@/store/appStore";
+
+const store = () => useAppStore.getState();
+const fineStatus = (id: string) => {
+  const fine = store().fines.find((f) => f.id === id);
+  if (!fine) throw new Error(`Missing fine ${id}`);
+  return deriveFineStatus(fine, rulesContextOf(store()));
+};
+const hero = () => store().challenges.find((c) => c.id === HERO_CASE_ID);
+const heroRefund = () => store().refunds.find((r) => r.id === HERO_REFUND_ID);
+
+function fillDraftToReview() {
+  store().startChallenge(HERO_FINE_ID);
+  store().setReason("I wasn't driving");
+  store().nextStep();
+  [0, 1, 2].forEach((i) => store().setFact(i, `Answer ${i}`));
+  store().nextStep();
+  store().addEvidence(["cedula.pdf"]);
+  store().nextStep();
+}
 
 beforeEach(() => {
-  useAppStore.setState({
-    fines: [...fines],
-    cases: [...initialCases],
-    refundForm: { bank: "", type: "Savings", account: "", consent: false },
-    refundSaved: false,
-    refundError: "",
-    refundStage: 0,
-  });
-  useAppStore.getState().startChallenge("F-2041");
+  vi.useFakeTimers();
+  store().resetDemo();
 });
-describe("Prototype rules", () => {
-  it("contains six fictional fines", () => {
-    expect(useAppStore.getState().fines).toHaveLength(6);
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe("mock data", () => {
+  it("gives Marta six fictional fines with the expected derived statuses (Scenario B)", () => {
+    expect(store().fines.filter((f) => f.ownerName === store().citizen.name)).toHaveLength(6);
+    expect(fineStatus("F-2042")).toBe("Under review");
+    expect(fineStatus("F-2043")).toBe("Pending payment");
+    expect(fineStatus("F-2044")).toBe("Refund on hold");
+    expect(fineStatus("F-2045")).toBe("Paid");
+    expect(fineStatus("F-2046")).toBe("Another authority");
   });
-  it("shows the external fine as issued by Soacha", () => {
-    expect(useAppStore.getState().fines.find((f) => f.external)?.authority).toBe(
-      "Secretaría de Movilidad de Soacha",
-    );
+
+  it("keeps each seeded refund consistent with R11", () => {
+    const ctx = rulesContextOf(store());
+    const fine = ctx.fines.find((f) => f.id === "F-2044");
+    expect(fine && deriveRefundEligibility(fine, ctx)).toBe(heroRefund()?.status);
   });
-  it("limits each guided facts answer to 500 characters", () => {
-    useAppStore.getState().setFact(0, "a".repeat(501));
-    expect(useAppStore.getState().facts[0]).toHaveLength(500);
+
+  it("has 12 challenges and 6 refunds for the staff queue", () => {
+    expect(store().challenges).toHaveLength(12);
+    expect(store().refunds).toHaveLength(6);
+    expect(
+      store().challenges.filter((c) => c.representative === "LegalRápido S.A.S."),
+    ).toHaveLength(5);
   });
+});
+
+describe("challenge wizard", () => {
+  it("limits each guided answer to 500 characters", () => {
+    store().setFact(0, "a".repeat(501));
+    expect(store().draft.facts[0]).toHaveLength(500);
+  });
+
   it("requires a reason before progressing", () => {
-    useAppStore.getState().nextStep();
-    expect(useAppStore.getState().step).toBe(0);
-    useAppStore.getState().setReason("I wasn't driving");
-    useAppStore.getState().nextStep();
-    expect(useAppStore.getState().step).toBe(1);
+    store().nextStep();
+    expect(store().draft.step).toBe(0);
+    expect(store().draftError).not.toBe("");
+    store().setReason("I wasn't driving");
+    store().nextStep();
+    expect(store().draft.step).toBe(1);
   });
-  it("submits the hero challenge as C-1042 at Being checked with Automatic checks", () => {
-    const s = useAppStore.getState();
-    s.setReason("I wasn't driving");
-    s.setDraft("Please review who was driving.");
-    expect(s.submitChallenge()).toBe("C-1042");
-    expect(useAppStore.getState().cases.find((c) => c.id === "C-1042")).toMatchObject({
-      stage: 1,
-      holder: "Automatic checks",
+
+  it("drafts the request when reaching the review step", () => {
+    fillDraftToReview();
+    expect(store().draft.step).toBe(3);
+    expect(store().draft.request).toContain("F-2041");
+  });
+});
+
+describe("hero flow", () => {
+  it("submits C-1042 as Received, then automatic checks move it to Validating with Laura", () => {
+    fillDraftToReview();
+    expect(store().submitChallenge()).toBe(HERO_CASE_ID);
+    expect(hero()).toMatchObject({ status: "Received", holder: "Automatic checks" });
+    vi.advanceTimersByTime(SIMULATION_DELAYS.checksDone);
+    expect(hero()).toMatchObject({ status: "Validating", holder: "Inspector Laura Gómez" });
+  });
+
+  it("applies the inspector decision, audits it and revokes the fine", () => {
+    const error = store().decideChallenge(HERO_CASE_ID, {
+      kind: "Revoke",
+      reason: "Driver identified",
+      citizenMessage: "Dear Marta, your fine is revoked.",
+      aiSuggestion: "Revoke",
     });
+    expect(error).toBeNull();
+    expect(hero()).toMatchObject({ status: "Decided", outcome: "Revoked" });
+    expect(fineStatus(HERO_FINE_ID)).toBe("Revoked");
+    const actions = store()
+      .audit.filter((a) => a.caseId === HERO_CASE_ID)
+      .map((a) => a.action);
+    expect(actions).toContain("AI suggestion accepted");
   });
-  it("requires separate bank-account consent", () => {
-    const s = useAppStore.getState();
-    s.setRefundField("bank", "Bancolombia");
-    s.setRefundField("account", "12345678");
-    s.saveRefund();
-    expect(useAppStore.getState().refundSaved).toBe(false);
-    s.setRefundField("consent", true);
-    s.saveRefund();
-    expect(useAppStore.getState().refundSaved).toBe(true);
-  });
-  it("keeps the refund on hold after details are saved", () => {
-    const s = useAppStore.getState();
-    s.setRefundField("bank", "Bancolombia");
-    s.setRefundField("account", "12345678");
-    s.setRefundField("consent", true);
-    s.saveRefund();
-    expect(useAppStore.getState().refundStage).toBe(0);
-  });
-  it("calculates recoverable money from the paid unauthorised-camera fine", () => {
-    expect(useAppStore.getState().recoverableAmount).toBe(650000);
-  });
-  it("advances the same shared case when the inspector updates it", () => {
-    useAppStore.getState().advanceCase("C-1042");
-    expect(useAppStore.getState().cases.find((c) => c.id === "C-1042")).toMatchObject({
-      stage: 2,
-      holder: "Inspector Laura Gómez",
+
+  it("rejects a decision without a reason", () => {
+    const error = store().decideChallenge(HERO_CASE_ID, {
+      kind: "Revoke",
+      reason: "",
+      citizenMessage: "x",
+      aiSuggestion: "Revoke",
     });
+    expect(error).not.toBeNull();
+    expect(hero()?.status).toBe("Validating");
+  });
+});
+
+describe("bulk revocation", () => {
+  it("flips Scenario B to A: fines revoked, R-1044 eligible, one audit entry per fine", () => {
+    expect(store().registerLegalAct(BULK_ACT_ID, "Laura Gómez")).toBeNull();
+    expect(fineStatus("F-2042")).toBe("Revoked");
+    expect(fineStatus("F-2044")).toBe("Revoked");
+    expect(fineStatus("F-2043")).toBe("Pending payment");
+    expect(heroRefund()?.status).toBe("Eligible");
+    const perFine = store().audit.filter((a) => a.action === "Fine revoked by legal act");
+    expect(perFine.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("reverts to Scenario B (demo only)", () => {
+    store().registerLegalAct(BULK_ACT_ID, "Laura Gómez");
+    store().revertLegalAct();
+    expect(fineStatus("F-2042")).toBe("Under review");
+    expect(heroRefund()?.status).toBe("On hold");
+  });
+});
+
+describe("refund bank details", () => {
+  const fill = () => {
+    store().setBankField("bank", "Bancolombia");
+    store().setBankField("account", "12345678");
+  };
+
+  it("requires the separate consent", () => {
+    fill();
+    store().saveBankDetails(HERO_REFUND_ID);
+    expect(store().bankSaved).toBe(false);
+    store().setBankField("consent", true);
+    store().saveBankDetails(HERO_REFUND_ID);
+    expect(store().bankSaved).toBe(true);
+  });
+
+  it("keeps the refund on hold in Scenario B after details are saved", () => {
+    fill();
+    store().setBankField("consent", true);
+    store().saveBankDetails(HERO_REFUND_ID);
+    expect(heroRefund()?.status).toBe("On hold");
+  });
+
+  it("verifies and approves automatically in Scenario A", () => {
+    store().registerLegalAct(BULK_ACT_ID, "Laura Gómez");
+    fill();
+    store().setBankField("consent", true);
+    store().saveBankDetails(HERO_REFUND_ID);
+    expect(heroRefund()?.status).toBe("Verifying payment details");
+    vi.advanceTimersByTime(SIMULATION_DELAYS.refundCheck);
+    expect(heroRefund()?.status).toBe("Approved");
+  });
+});
+
+describe("reset", () => {
+  it("restores the seeded demo data and cancels pending simulations", () => {
+    fillDraftToReview();
+    store().submitChallenge();
+    store().resetDemo();
+    vi.advanceTimersByTime(SIMULATION_DELAYS.checksDone);
+    expect(hero()?.status).toBe("Validating");
+    expect(
+      store().audit.some(
+        (a) => a.action === "Challenge submitted" && a.timestamp.startsWith("2026-11-25"),
+      ),
+    ).toBe(false);
   });
 });

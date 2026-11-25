@@ -39,7 +39,7 @@ describe("applyDecision", () => {
     });
     expect(result.entity.messageValues).toMatchObject({
       outcome: "Revoked",
-      plain_reason: input.reason,
+      plain_reason: "The owner cannot be presumed to be the driver",
       date: "09 Dec 2026",
     });
   });
