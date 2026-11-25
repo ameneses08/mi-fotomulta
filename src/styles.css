@@ -1284,3 +1284,34 @@
   box-shadow: var(--modal-shadow);
   padding: 8px;
 }
+
+/* Staff inbox */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.filter {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  min-width: 170px;
+}
+.filter select {
+  font-weight: 400;
+}
+.group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+}

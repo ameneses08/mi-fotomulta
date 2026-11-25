@@ -7,31 +7,38 @@ import {
 import { challengeClock, type LegalClock } from "@/lib/sla";
 import type {
   ChallengeCase,
+  ChallengeReason,
   ChallengeStatus,
-  ClockRisk,
   IsoDate,
-  RefundCase,
+  RuleCheck,
   RuleId,
 } from "@/types";
+
+export type Priority = "High" | "Medium" | "Low";
 
 export interface ChallengeRow {
   challenge: ChallengeCase;
   clock: LegalClock;
+  checks: RuleCheck[];
   flags: RuleId[];
+  priority: Priority;
   open: boolean;
+  groupId?: string;
 }
 
-export interface RefundRow {
-  refund: RefundCase;
-  flags: RuleId[];
-}
-
-export interface RowGroup {
+export interface CaseGroup {
+  id: string;
   representative: string;
-  rows: ChallengeRow[];
+  cases: ChallengeCase[];
 }
 
-export type QueueItem = { type: "row"; row: ChallengeRow } | { type: "group"; group: RowGroup };
+export interface InboxFilters {
+  priority: Priority | "All";
+  type: ChallengeReason | "All";
+  assignee: "All" | "Mine";
+}
+
+export const ALL_FILTERS: InboxFilters = { priority: "All", type: "All", assignee: "All" };
 
 const OPEN_STATUSES = new Set<ChallengeStatus>([
   "Received",
@@ -39,55 +46,74 @@ const OPEN_STATUSES = new Set<ChallengeStatus>([
   "Needs correction",
   "Hearing scheduled",
 ]);
-const RISK_ORDER: Record<ClockRisk, number> = { Overdue: 0, "At risk": 1, "On track": 2 };
+const PRIORITY_ORDER: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 };
 
-/** Challenges sorted by deadline risk: open before decided, then overdue, at risk, on track. */
+/** "LegalRápido S.A.S." → "legalrapido-sas" */
+export function groupIdFor(representative: string): string {
+  return representative
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+/** High: deadline at risk or a failed check. Medium: anything flagged. Low: clean. */
+export function priorityOf(clock: LegalClock, checks: RuleCheck[]): Priority {
+  if (clock.risk !== "On track" || checks.some((c) => c.result === "Fail")) return "High";
+  return checks.some((c) => c.result === "Flag") ? "Medium" : "Low";
+}
+
+/** Cases filed by the same representative, open ones only, two or more per group. */
+export function buildGroups(challenges: readonly ChallengeCase[]): CaseGroup[] {
+  const groups = new Map<string, CaseGroup>();
+  for (const challenge of challenges) {
+    const rep = challenge.representative;
+    if (!rep || !OPEN_STATUSES.has(challenge.status)) continue;
+    const id = groupIdFor(rep);
+    const group = groups.get(id) ?? { id, representative: rep, cases: [] };
+    groups.set(id, { ...group, cases: [...group.cases, challenge] });
+  }
+  return [...groups.values()].filter((g) => g.cases.length > 1);
+}
+
+/** Challenges triaged by priority, then deadline risk. Decided cases go last. */
 export function buildChallengeRows(ctx: RulesContext, today: IsoDate): ChallengeRow[] {
+  const grouped = new Set(buildGroups(ctx.challenges).map((g) => g.id));
   return ctx.challenges
-    .map((challenge) => ({
-      challenge,
-      clock: challengeClock(challenge, today),
-      flags: flaggedRules(evaluateChallengeRules(challenge, ctx)),
-      open: OPEN_STATUSES.has(challenge.status),
-    }))
+    .map((challenge): ChallengeRow => {
+      const clock = challengeClock(challenge, today);
+      const checks = evaluateChallengeRules(challenge, ctx);
+      const groupId = challenge.representative ? groupIdFor(challenge.representative) : undefined;
+      return {
+        challenge,
+        clock,
+        checks,
+        flags: flaggedRules(checks),
+        priority: priorityOf(clock, checks),
+        open: OPEN_STATUSES.has(challenge.status),
+        ...(groupId && grouped.has(groupId) ? { groupId } : {}),
+      };
+    })
     .sort(
       (a, b) =>
         Number(b.open) - Number(a.open) ||
-        RISK_ORDER[a.clock.risk] - RISK_ORDER[b.clock.risk] ||
+        PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority] ||
         b.clock.used - a.clock.used,
     );
 }
 
-export function buildRefundRows(ctx: RulesContext): RefundRow[] {
-  return ctx.refunds.map((refund) => ({
-    refund,
-    flags: flaggedRules(evaluateRefundRules(refund, ctx)),
-  }));
-}
-
-/**
- * Collapses open cases filed by the same representative into one overview group, placed where
- * its first member would be. Grouping never changes how each case is decided.
- */
-export function groupSimilar(rows: ChallengeRow[]): QueueItem[] {
-  const byRep = new Map<string, ChallengeRow[]>();
-  for (const row of rows) {
-    const rep = row.challenge.representative;
-    if (rep && row.open) byRep.set(rep, [...(byRep.get(rep) ?? []), row]);
-  }
-  const items: QueueItem[] = [];
-  const placed = new Set<string>();
-  for (const row of rows) {
-    const rep = row.challenge.representative;
-    const group = rep ? byRep.get(rep) : undefined;
-    if (!rep || !group || group.length < 2 || !row.open) {
-      items.push({ type: "row", row });
-    } else if (!placed.has(rep)) {
-      placed.add(rep);
-      items.push({ type: "group", group: { representative: rep, rows: group } });
-    }
-  }
-  return items;
+export function filterRows(
+  rows: ChallengeRow[],
+  filters: InboxFilters,
+  me: string,
+): ChallengeRow[] {
+  return rows.filter(
+    (row) =>
+      (filters.priority === "All" || row.priority === filters.priority) &&
+      (filters.type === "All" || row.challenge.reason === filters.type) &&
+      (filters.assignee === "All" || row.challenge.holder.endsWith(me)),
+  );
 }
 
 export interface QueueSummary {
@@ -97,18 +123,15 @@ export interface QueueSummary {
   flagged: number;
 }
 
-export function summariseQueue(
-  challengeRows: ChallengeRow[],
-  refundRows: RefundRow[],
-): QueueSummary {
-  const open = challengeRows.filter((r) => r.open);
+export function summariseQueue(rows: ChallengeRow[], ctx: RulesContext): QueueSummary {
+  const open = rows.filter((r) => r.open);
+  const pendingRefunds = ctx.refunds.filter((r) => r.status === "Verifying payment details");
   return {
     openCases: open.length,
     atRisk: open.filter((r) => r.clock.risk !== "On track").length,
-    refundsToApprove: refundRows.filter((r) => r.refund.status === "Verifying payment details")
-      .length,
+    refundsToApprove: pendingRefunds.length,
     flagged:
       open.filter((r) => r.flags.length > 0).length +
-      refundRows.filter((r) => r.flags.length > 0).length,
+      pendingRefunds.filter((r) => flaggedRules(evaluateRefundRules(r, ctx)).length > 0).length,
   };
 }

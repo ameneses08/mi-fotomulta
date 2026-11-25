@@ -540,3 +540,6 @@ export const MOCK_SIGN_IN = {
   staffUsername: "laura.gomez",
   staffPassword: "demo-pass-2026",
 } as const;
+
+/** Fictional SDM inspectors a case can be assigned to. */
+export const INSPECTORS = [INSPECTOR_NAME, "Andrés Ruiz", "Camila Torres"];

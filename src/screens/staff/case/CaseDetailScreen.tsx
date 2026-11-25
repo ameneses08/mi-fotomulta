@@ -14,7 +14,7 @@ export function CaseDetailScreen({ id }: { id: string }) {
   const refund = useRefund(id);
 
   return (
-    <StaffLayout active="queue">
+    <StaffLayout active="inbox">
       <Link to="/staff" className="back-link">
         <ArrowLeft size={16} aria-hidden="true" />
         Back to queue

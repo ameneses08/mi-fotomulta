@@ -22,7 +22,7 @@ export function LegalActsScreen() {
   if (!act || !preview) return null;
 
   return (
-    <StaffLayout active="acts">
+    <StaffLayout active="bulk">
       <div className="eyebrow">Inspector workspace</div>
       <h1 className="page-title mt-3">Legal acts</h1>
       <p className="page-subtitle">Acts that change many fines at once. Fictional documents.</p>

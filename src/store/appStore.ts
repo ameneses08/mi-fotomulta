@@ -28,6 +28,7 @@ import {
   type ChallengeDraft,
 } from "@/lib/challenge";
 import { answerQuestion, matchIntent, type AssistantAction } from "@/lib/assistant";
+import { assignCase } from "@/lib/assignment";
 import { applyDecision } from "@/lib/decision";
 import {
   autoVerifyRefund,
@@ -114,6 +115,7 @@ interface Actions {
   /** Restarts simulated background steps that a page reload interrupted. */
   resumeSimulations: () => void;
   askAssistant: (question: string) => void;
+  assignChallenge: (caseId: string, inspector: string) => void;
 }
 
 export type AppState = DemoData & Actions;
@@ -369,6 +371,15 @@ export const useAppStore = create<AppState>()(
         resetDemo: (preset) => {
           cancelScheduled();
           set(initialData(preset));
+        },
+        assignChallenge: (caseId, inspector) => {
+          const current = get().challenges.find((c) => c.id === caseId);
+          const result = current && assignCase(current, inspector, INSPECTOR_NAME, demoTimestamp());
+          if (!result) return;
+          set((s) => ({
+            challenges: replaceById(s.challenges, result.challenge),
+            audit: [...s.audit, result.audit],
+          }));
         },
         askAssistant: (question) => {
           const text = question.trim();
