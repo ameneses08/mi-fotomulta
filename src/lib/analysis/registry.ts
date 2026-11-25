@@ -122,7 +122,9 @@ export function refundRegistryFindings(
   fine: Fine,
   ctx: AnalysisContext,
 ): AnalysisFinding[] {
-  const eligibility = deriveRefundEligibility(fine, ctx);
+  // A refund is never compared with itself: its own payment doesn't make it ineligible.
+  const others = { ...ctx, refunds: ctx.refunds.filter((r) => r.id !== refund.id) };
+  const eligibility = deriveRefundEligibility(fine, others);
   const aboveThreshold = refund.amount > RULES_CONFIG.refundHumanThreshold;
   const amounts = {
     amount: formatCOP(refund.amount),

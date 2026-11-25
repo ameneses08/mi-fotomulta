@@ -54,6 +54,13 @@ describe("registryFindings", () => {
 });
 
 describe("refundRegistryFindings", () => {
+  it("does not mark a paid refund ineligible because of its own payment", () => {
+    const fine = makeFine({ cameraId: unauthorisedCamera.id, paidOn: "2026-11-01" });
+    const paid = makeRefund({ status: "Paid" });
+    const inForce = { ...ctx, legalActs: [makeAct({ status: "In force" })], refunds: [paid] };
+    expect(refundRegistryFindings(paid, fine, inForce)[0]?.result).toBe("Pass");
+  });
+
   it("checks eligibility (R11) and the approval threshold", () => {
     const fine = makeFine({ cameraId: unauthorisedCamera.id, paidOn: "2026-11-01" });
     const inForce = { ...ctx, legalActs: [makeAct({ status: "In force" })] };
