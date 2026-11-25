@@ -53,7 +53,7 @@ export function DocumentCard({ caseId, document }: { caseId: string; document: E
                   <input
                     type="checkbox"
                     checked={Boolean(verified[key])}
-                    onChange={() => toggle(key)}
+                    onChange={() => toggle(caseId, document.name, field.name)}
                   />
                   Verified by inspector
                 </label>

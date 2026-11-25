@@ -210,6 +210,33 @@ describe("one challenge per fine (R3)", () => {
   });
 });
 
+describe("AI flag reviews", () => {
+  it("dismisses a flag with a reason, audits it and removes it from the open flags", () => {
+    expect(store().reviewFlag("C-1049:image-0", "Dismissed", "")).not.toBeNull();
+    expect(
+      store().reviewFlag("C-1049:image-0", "Dismissed", "Original photo checked in person"),
+    ).toBeNull();
+    expect(store().findingReviews["C-1049:image-0"]).toMatchObject({
+      status: "Dismissed",
+      reviewedBy: "Laura Gómez",
+    });
+    expect(store().audit.at(-1)).toMatchObject({
+      caseId: "C-1049",
+      action: "AI flag dismissed as false positive",
+    });
+  });
+
+  it("confirms a refund flag", () => {
+    expect(store().reviewFlag("R-1047:holder", "Confirmed", "")).toBeNull();
+    expect(store().audit.at(-1)).toMatchObject({ caseId: "R-1047", action: "AI flag confirmed" });
+  });
+
+  it("audits field verification", () => {
+    store().toggleFieldVerified("C-1042", "licence-andres-rodriguez.pdf", "Valid until");
+    expect(store().audit.at(-1)?.action).toBe("Extracted field verified");
+  });
+});
+
 describe("reset", () => {
   it("can start before Marta's challenge so the citizen journey begins fresh", () => {
     store().resetDemo("beforeChallenge");

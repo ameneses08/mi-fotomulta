@@ -42,7 +42,9 @@ import {
 } from "@/lib/refund";
 import { registerAct } from "@/lib/revocation";
 import { createAuditEntry } from "@/lib/transitions";
-import type { AnalysisContext } from "@/lib/analysis";
+import { analyseCase, analyseRefund, type AnalysisContext } from "@/lib/analysis";
+import { fieldKey } from "@/lib/analysis/fieldKey";
+import { fieldVerificationEntry, reviewFinding } from "@/lib/analysis/review";
 import type { RulesContext } from "@/lib/rules";
 import type {
   AuditEntry,
@@ -51,6 +53,7 @@ import type {
   Citizen,
   DecisionKind,
   EvidenceItem,
+  ExtractedFieldName,
   FindingReview,
   Fine,
   LegalAct,
@@ -130,7 +133,12 @@ interface Actions {
   askAssistant: (question: string) => void;
   assignChallenge: (caseId: string, inspector: string) => void;
   appealChallenge: (caseId: string) => string | null;
-  toggleFieldVerified: (key: string) => void;
+  toggleFieldVerified: (caseId: string, documentName: string, field: ExtractedFieldName) => void;
+  reviewFlag: (
+    findingId: string,
+    decision: FindingReview["status"],
+    reason: string,
+  ) => string | null;
 }
 
 export type AppState = DemoData & Actions;
@@ -406,8 +414,35 @@ export const useAppStore = create<AppState>()(
           cancelScheduled();
           set(initialData(preset));
         },
-        toggleFieldVerified: (key) =>
-          set((s) => ({ verifiedFields: { ...s.verifiedFields, [key]: !s.verifiedFields[key] } })),
+        toggleFieldVerified: (caseId, documentName, field) => {
+          const key = fieldKey(caseId, documentName, field);
+          const verified = !get().verifiedFields[key];
+          const entry = fieldVerificationEntry(
+            caseId,
+            `${documentName} – ${field}`,
+            verified,
+            INSPECTOR_NAME,
+            demoTimestamp(),
+          );
+          set((s) => ({
+            verifiedFields: { ...s.verifiedFields, [key]: verified },
+            audit: [...s.audit, entry],
+          }));
+        },
+        reviewFlag: (findingId, decision, reason) => {
+          const ctx = analysisContextOf(get());
+          const caseId = findingId.split(":")[0] ?? "";
+          const analysis = analyseCase(caseId, ctx) ?? analyseRefund(caseId, ctx);
+          const finding = analysis?.findings.find((f) => f.id === findingId);
+          if (!finding) return "Finding not found.";
+          const result = reviewFinding(finding, decision, reason, INSPECTOR_NAME, demoTimestamp());
+          if (!result.ok) return result.error;
+          set((s) => ({
+            findingReviews: { ...s.findingReviews, [findingId]: result.review },
+            audit: [...s.audit, result.audit],
+          }));
+          return null;
+        },
         appealChallenge: (caseId) => {
           const { challenges: all, citizen: owner } = get();
           const current = all.find((c) => c.id === caseId);
