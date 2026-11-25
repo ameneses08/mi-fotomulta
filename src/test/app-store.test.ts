@@ -168,6 +168,13 @@ describe("refund bank details", () => {
 });
 
 describe("reset", () => {
+  it("can start before Marta's challenge so the citizen journey begins fresh", () => {
+    store().resetDemo("beforeChallenge");
+    expect(hero()).toBeUndefined();
+    expect(store().challenges).toHaveLength(11);
+    expect(fineStatus(HERO_FINE_ID)).toBe("Pending payment");
+  });
+
   it("restores the seeded demo data and cancels pending simulations", () => {
     fillDraftToReview();
     store().submitChallenge();

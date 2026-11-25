@@ -8,7 +8,9 @@ import { useCaseAudit, useChallenge } from "@/store/selectors";
 export function CaseView({ caseId }: { caseId: string }) {
   const challenge = useChallenge(caseId);
   const history = citizenHistory(useCaseAudit(caseId));
-  if (!challenge) return <p className="text-muted-foreground">Case {caseId} not found.</p>;
+  if (!challenge) {
+    return <p className="text-muted-foreground">No challenge {caseId} has been submitted yet.</p>;
+  }
 
   return (
     <>

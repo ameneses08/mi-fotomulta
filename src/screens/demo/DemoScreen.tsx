@@ -42,7 +42,10 @@ export function DemoScreen() {
           {challenge ? (
             <ChallengeDetail challenge={challenge} compact />
           ) : (
-            <p className="text-muted-foreground">Case not found. Use Demo controls → Reset.</p>
+            <p className="text-muted-foreground">
+              Marta has not submitted {HERO_CASE_ID} yet. Submit it from the citizen app, or use
+              Demo controls → Reset demo data.
+            </p>
           )}
         </section>
       </div>

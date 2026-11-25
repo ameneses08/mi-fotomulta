@@ -96,20 +96,27 @@ interface Actions {
   registerLegalAct: (actId: string, official: string) => string | null;
   revertLegalAct: () => void;
   payFine: (fineId: string) => void;
-  resetDemo: () => void;
+  resetDemo: (preset?: DemoPreset) => void;
 }
 
 export type AppState = DemoData & Actions;
 
-function initialData(): DemoData {
+/**
+ * "submitted": C-1042 is already with the inspector (staff and /demo ready).
+ * "beforeChallenge": Marta has not challenged F-2041 yet, for recording the citizen journey.
+ */
+export type DemoPreset = "submitted" | "beforeChallenge";
+
+function initialData(preset: DemoPreset = "submitted"): DemoData {
+  const keep = (caseId: string) => preset === "submitted" || caseId !== HERO_CASE_ID;
   return {
     citizen,
     fines: [...fines],
     cameras: [...cameras],
     legalActs: [...legalActs],
-    challenges: [...challenges],
+    challenges: challenges.filter((c) => keep(c.id)),
     refunds: [...refunds],
-    audit: [...initialAudit],
+    audit: initialAudit.filter((entry) => keep(entry.caseId)),
     draft: emptyDraft(HERO_FINE_ID),
     draftError: "",
     bankForm: EMPTY_BANK_FORM,
@@ -302,9 +309,9 @@ export const useAppStore = create<AppState>((set, get) => {
         fines: s.fines.map((f) => (f.id === fineId ? { ...f, paidOn: DEMO_TODAY } : f)),
       })),
 
-    resetDemo: () => {
+    resetDemo: (preset) => {
       cancelScheduled();
-      set(initialData());
+      set(initialData(preset));
     },
   };
 });

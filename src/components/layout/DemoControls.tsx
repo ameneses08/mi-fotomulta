@@ -1,4 +1,4 @@
-import { RotateCcw, Settings2, Undo2 } from "lucide-react";
+import { RotateCcw, Settings2, Undo2, UserRound } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,9 +28,13 @@ export function DemoControls() {
         <p className="text-sm font-semibold">Demo controls</p>
         <p className="mt-1 text-xs text-muted-foreground">For presenting the prototype only.</p>
         <div className="mt-4 grid gap-2">
-          <Button variant="outline" onClick={() => run(resetDemo)}>
+          <Button variant="outline" onClick={() => run(() => resetDemo("submitted"))}>
             <RotateCcw size={16} aria-hidden="true" />
             Reset demo data
+          </Button>
+          <Button variant="outline" onClick={() => run(() => resetDemo("beforeChallenge"))}>
+            <UserRound size={16} aria-hidden="true" />
+            Reset to before Marta's challenge
           </Button>
           <Button variant="outline" disabled={!canRevert} onClick={() => run(revertLegalAct)}>
             <Undo2 size={16} aria-hidden="true" />
