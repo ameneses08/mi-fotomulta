@@ -14,6 +14,7 @@ import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as CitizenHelpRouteImport } from './routes/citizen_.help'
+import { Route as StaffAiOversightRouteImport } from './routes/staff_.ai-oversight'
 import { Route as StaffAuditRouteImport } from './routes/staff_.audit'
 import { Route as StaffBulkRevocationRouteImport } from './routes/staff_.bulk-revocation'
 import { Route as StaffCamerasRouteImport } from './routes/staff_.cameras'
@@ -49,6 +50,11 @@ const StaffRoute = StaffRouteImport.update({
 const CitizenHelpRoute = CitizenHelpRouteImport.update({
   id: '/citizen_/help',
   path: '/citizen/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffAiOversightRoute = StaffAiOversightRouteImport.update({
+  id: '/staff_/ai-oversight',
+  path: '/staff/ai-oversight',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffAuditRoute = StaffAuditRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen/help': typeof CitizenHelpRoute
+  '/staff/ai-oversight': typeof StaffAiOversightRoute
   '/staff/audit': typeof StaffAuditRoute
   '/staff/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff/cameras': typeof StaffCamerasRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen/help': typeof CitizenHelpRoute
+  '/staff/ai-oversight': typeof StaffAiOversightRoute
   '/staff/audit': typeof StaffAuditRoute
   '/staff/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff/cameras': typeof StaffCamerasRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen_/help': typeof CitizenHelpRoute
+  '/staff_/ai-oversight': typeof StaffAiOversightRoute
   '/staff_/audit': typeof StaffAuditRoute
   '/staff_/bulk-revocation': typeof StaffBulkRevocationRoute
   '/staff_/cameras': typeof StaffCamerasRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen/help'
+    | '/staff/ai-oversight'
     | '/staff/audit'
     | '/staff/bulk-revocation'
     | '/staff/cameras'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen/help'
+    | '/staff/ai-oversight'
     | '/staff/audit'
     | '/staff/bulk-revocation'
     | '/staff/cameras'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen_/help'
+    | '/staff_/ai-oversight'
     | '/staff_/audit'
     | '/staff_/bulk-revocation'
     | '/staff_/cameras'
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   DemoRoute: typeof DemoRoute
   StaffRoute: typeof StaffRoute
   CitizenHelpRoute: typeof CitizenHelpRoute
+  StaffAiOversightRoute: typeof StaffAiOversightRoute
   StaffAuditRoute: typeof StaffAuditRoute
   StaffBulkRevocationRoute: typeof StaffBulkRevocationRoute
   StaffCamerasRoute: typeof StaffCamerasRoute
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/citizen/help'
       fullPath: '/citizen/help'
       preLoaderRoute: typeof CitizenHelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff_/ai-oversight': {
+      id: '/staff_/ai-oversight'
+      path: '/staff/ai-oversight'
+      fullPath: '/staff/ai-oversight'
+      preLoaderRoute: typeof StaffAiOversightRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff_/audit': {
@@ -361,6 +381,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoRoute: DemoRoute,
   StaffRoute: StaffRoute,
   CitizenHelpRoute: CitizenHelpRoute,
+  StaffAiOversightRoute: StaffAiOversightRoute,
   StaffAuditRoute: StaffAuditRoute,
   StaffBulkRevocationRoute: StaffBulkRevocationRoute,
   StaffCamerasRoute: StaffCamerasRoute,
