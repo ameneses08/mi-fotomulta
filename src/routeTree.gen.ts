@@ -14,6 +14,7 @@ import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as CitizenHelpRouteImport } from './routes/citizen_.help'
+import { Route as StaffCamerasRouteImport } from './routes/staff_.cameras'
 import { Route as StaffLegalActsRouteImport } from './routes/staff_.legal-acts'
 import { Route as CitizenCasesIndexRouteImport } from './routes/citizen_.cases.index'
 import { Route as CitizenCasesIdRouteImport } from './routes/citizen_.cases.$id'
@@ -46,6 +47,11 @@ const StaffRoute = StaffRouteImport.update({
 const CitizenHelpRoute = CitizenHelpRouteImport.update({
   id: '/citizen_/help',
   path: '/citizen/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffCamerasRoute = StaffCamerasRouteImport.update({
+  id: '/staff_/cameras',
+  path: '/staff/cameras',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffLegalActsRoute = StaffLegalActsRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen/help': typeof CitizenHelpRoute
+  '/staff/cameras': typeof StaffCamerasRoute
   '/staff/legal-acts': typeof StaffLegalActsRoute
   '/citizen/cases/$id': typeof CitizenCasesIdRoute
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen/help': typeof CitizenHelpRoute
+  '/staff/cameras': typeof StaffCamerasRoute
   '/staff/legal-acts': typeof StaffLegalActsRoute
   '/citizen/cases/$id': typeof CitizenCasesIdRoute
   '/citizen/fines/$id': typeof CitizenFinesIdRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/demo': typeof DemoRoute
   '/staff': typeof StaffRoute
   '/citizen_/help': typeof CitizenHelpRoute
+  '/staff_/cameras': typeof StaffCamerasRoute
   '/staff_/legal-acts': typeof StaffLegalActsRoute
   '/citizen_/cases/$id': typeof CitizenCasesIdRoute
   '/citizen_/fines/$id': typeof CitizenFinesIdRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen/help'
+    | '/staff/cameras'
     | '/staff/legal-acts'
     | '/citizen/cases/$id'
     | '/citizen/fines/$id'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen/help'
+    | '/staff/cameras'
     | '/staff/legal-acts'
     | '/citizen/cases/$id'
     | '/citizen/fines/$id'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/staff'
     | '/citizen_/help'
+    | '/staff_/cameras'
     | '/staff_/legal-acts'
     | '/citizen_/cases/$id'
     | '/citizen_/fines/$id'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   DemoRoute: typeof DemoRoute
   StaffRoute: typeof StaffRoute
   CitizenHelpRoute: typeof CitizenHelpRoute
+  StaffCamerasRoute: typeof StaffCamerasRoute
   StaffLegalActsRoute: typeof StaffLegalActsRoute
   CitizenCasesIdRoute: typeof CitizenCasesIdRoute
   CitizenFinesIdRoute: typeof CitizenFinesIdRoute
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/citizen/help'
       fullPath: '/citizen/help'
       preLoaderRoute: typeof CitizenHelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff_/cameras': {
+      id: '/staff_/cameras'
+      path: '/staff/cameras'
+      fullPath: '/staff/cameras'
+      preLoaderRoute: typeof StaffCamerasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff_/legal-acts': {
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoRoute: DemoRoute,
   StaffRoute: StaffRoute,
   CitizenHelpRoute: CitizenHelpRoute,
+  StaffCamerasRoute: StaffCamerasRoute,
   StaffLegalActsRoute: StaffLegalActsRoute,
   CitizenCasesIdRoute: CitizenCasesIdRoute,
   CitizenFinesIdRoute: CitizenFinesIdRoute,
