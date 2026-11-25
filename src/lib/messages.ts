@@ -7,6 +7,7 @@ import {
 } from "@/data/statusMessages";
 import { fillTemplate, formatCOP } from "@/lib/format";
 import type {
+  AuditEntry,
   ChallengeCase,
   ChallengeStatus,
   RefundCase,
@@ -78,4 +79,13 @@ export function refundSteps(refund: RefundCase): { label: string; state: StageSt
     label,
     state: index < current ? "done" : index === current ? "current" : "upcoming",
   }));
+}
+
+/**
+ * The citizen's case history: entries (newest first) back to the latest submission, so a
+ * resubmitted challenge does not show the history of the one it replaced.
+ */
+export function citizenHistory(entriesNewestFirst: readonly AuditEntry[]): AuditEntry[] {
+  const submitted = entriesNewestFirst.findIndex((e) => e.action === "Challenge submitted");
+  return submitted === -1 ? [...entriesNewestFirst] : entriesNewestFirst.slice(0, submitted + 1);
 }

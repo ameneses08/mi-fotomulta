@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { challengeMessage, holderLabel, refundMessage, trackerSteps } from "@/lib/messages";
+import {
+  challengeMessage,
+  citizenHistory,
+  holderLabel,
+  refundMessage,
+  trackerSteps,
+} from "@/lib/messages";
+import { createAuditEntry } from "@/lib/transitions";
 import { makeChallenge, makeRefund } from "@/test/fixtures";
 
 describe("status messages", () => {
@@ -47,5 +54,23 @@ describe("trackerSteps", () => {
   it("shows the hearing as done when one took place", () => {
     const steps = trackerSteps(makeChallenge({ status: "Decided", hadHearing: true }));
     expect(steps[2]?.state).toBe("done");
+  });
+});
+
+describe("citizenHistory", () => {
+  const entry = (action: string, timestamp: string) =>
+    createAuditEntry({ caseId: "C-1", actor: "System", action, reason: "", timestamp });
+
+  it("stops at the latest submission", () => {
+    const entries = [
+      entry("Status changed", "2026-11-25T10:01:00Z"),
+      entry("Challenge submitted", "2026-11-25T10:00:00Z"),
+      entry("Status changed", "2026-11-20T10:00:00Z"),
+      entry("Challenge submitted", "2026-11-20T09:00:00Z"),
+    ];
+    expect(citizenHistory(entries).map((e) => e.timestamp)).toEqual([
+      "2026-11-25T10:01:00Z",
+      "2026-11-25T10:00:00Z",
+    ]);
   });
 });

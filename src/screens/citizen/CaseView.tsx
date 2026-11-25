@@ -1,12 +1,13 @@
 import { AuditLog } from "@/components/AuditLog";
 import { Notice } from "@/components/Notice";
 import { StageTracker } from "@/components/StageTracker";
+import { citizenHistory } from "@/lib/messages";
 import { useCaseAudit, useChallenge } from "@/store/selectors";
 
 /** The citizen's view of one challenge. Used on its own route and in the demo phone frame. */
 export function CaseView({ caseId }: { caseId: string }) {
   const challenge = useChallenge(caseId);
-  const history = useCaseAudit(caseId);
+  const history = citizenHistory(useCaseAudit(caseId));
   if (!challenge) return <p className="text-muted-foreground">Case {caseId} not found.</p>;
 
   return (

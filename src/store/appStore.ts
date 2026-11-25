@@ -202,7 +202,6 @@ export const useAppStore = create<AppState>((set, get) => {
       set((s) => ({
         challenges: replaceById(s.challenges, result.challenge),
         audit: [...s.audit, ...result.audit],
-        draft: emptyDraft(draft.fineId),
       }));
       schedule(() => finishAutomaticChecks(caseId), SIMULATION_DELAYS.checksDone);
       return caseId;
